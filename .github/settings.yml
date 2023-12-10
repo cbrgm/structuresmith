@@ -1,0 +1,62 @@
+# These settings are synced to GitHub by https://probot.github.io/apps/settings/
+
+repository:
+  name: structuresmith
+  description: Automates the generation of project files and templates for repositories based on customizable YAML configurations.
+  homepage: https://cbrgm.net
+  topics: template, automation, yaml, repository, files, codegen, go, rendering
+  private: true
+  has_issues: true
+  has_projects: false
+  has_wiki: false
+  has_downloads: true
+  default_branch: main
+  allow_squash_merge: true
+  allow_merge_commit: true
+  allow_rebase_merge: true
+  delete_branch_on_merge: true
+  enable_automated_security_fixes: true
+  enable_vulnerability_alerts: true
+
+# Labels: define labels for Issues and Pull Requests
+labels:
+  - name: bug
+    color: CC0000
+    description: An issue with the system 🐛.
+
+  - name: feature
+    color: '#336699'
+    description: New functionality.
+
+  - name: Help Wanted
+    new_name: first-timers-only
+
+# Collaborators: give specific users access to this repository.
+# See https://docs.github.com/en/rest/reference/repos#add-a-repository-collaborator for available options
+collaborators:
+  # - username: bkeepers
+  #   permission: push
+  # - username: hubot
+  #   permission: pull
+
+branches:
+  - name: main
+    # https://docs.github.com/en/rest/reference/repos#update-branch-protection
+    # Branch Protection settings. Set to null to disable
+    protection:
+      required_pull_request_reviews:
+        required_approving_review_count: 0
+        dismiss_stale_reviews: true
+        require_code_owner_reviews: false
+        dismissal_restrictions:
+          users: []
+          teams: []
+      required_status_checks:
+        strict: false
+        contexts: []
+      enforce_admins: false
+      required_linear_history: false
+      restrictions:
+        apps: []
+        users: []
+        teams: []

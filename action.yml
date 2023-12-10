@@ -1,0 +1,42 @@
+name: 'StructureSmith Action'
+description: 'Automatically generate project templates for repositories'
+author: 'cbrgm'
+
+inputs:
+  config-file:
+    description: 'Path to the YAML configuration file'
+    required: true
+  output-path:
+    description: 'Output path prefix for generated files'
+    default: "./out"
+    required: false
+  templates-dir:
+    description: 'Directory where template files are stored'
+    default: "./templates"
+    required: false
+  repo:
+    description: 'Specify a single repository to render'
+    required: false
+  max-parallel:
+    description: 'Maximum number of repositories to process in parallel'
+    default: "5"
+    required: false
+
+runs:
+  using: docker
+  image: 'docker://quay.io/cbrgm/structuresmith:v1'
+  args:
+    - --config
+    - ${{ inputs.config-file }}
+    - --output
+    - ${{ inputs.output-path }}
+    - --templates
+    - ${{ inputs.templates-dir }}
+    - --repo
+    - ${{ inputs.repo }}
+    - --max-parallel
+    - ${{ inputs.max-parallel }}
+
+branding:
+  icon: code
+  color: blue

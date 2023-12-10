@@ -1,0 +1,74 @@
+name: Release Workflow
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    env:
+      BINARY_NAME: structuresmith
+      DOCKER_REGISTRY: quay.io/cbrgm
+      DOCKER_TAGS: latest v1
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Configure Release Version
+        run: echo "release_version=${GITHUB_REF_NAME/v/}" >> $GITHUB_ENV
+
+      - name: Setup Go Environment
+        uses: actions/setup-go@v5
+        with:
+          go-version: '^1.21'
+
+      - name: Download Go Modules
+        run: go mod vendor
+
+      - name: Run Tests
+        run: make test
+
+      - name: Build Application
+        run: make release
+
+      - name: Package Binaries
+        run: |
+          rsync ./bin/${BINARY_NAME}_darwin_amd64 README.md LICENSE ${BINARY_NAME}_darwin_amd64 && tar czvf ${BINARY_NAME}_darwin_amd64.tar.gz ${BINARY_NAME}_darwin_amd64
+          rsync ./bin/${BINARY_NAME}_darwin_arm64 README.md LICENSE ${BINARY_NAME}_darwin_arm64 && tar czvf ${BINARY_NAME}_darwin_arm64.tar.gz ${BINARY_NAME}_darwin_arm64
+          rsync ./bin/${BINARY_NAME}_linux_amd64 README.md LICENSE ${BINARY_NAME}_linux_amd64 && tar czvf ${BINARY_NAME}_linux_amd64.tar.gz ${BINARY_NAME}_linux_amd64
+          rsync ./bin/${BINARY_NAME}_linux_arm64 README.md LICENSE ${BINARY_NAME}_linux_arm64 && tar czvf ${BINARY_NAME}_linux_arm64.tar.gz ${BINARY_NAME}_linux_arm64
+          rsync ./bin/${BINARY_NAME}_windows_amd64 README.md LICENSE ${BINARY_NAME}_windows_amd64 && tar czvf ${BINARY_NAME}_windows_amd64.tar.gz ${BINARY_NAME}_windows_amd64
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          generate_release_notes: true
+          files: |
+            ${{ env.BINARY_NAME }}_darwin_amd64.tar.gz
+            ${{ env.BINARY_NAME }}_darwin_arm64.tar.gz
+            ${{ env.BINARY_NAME }}_linux_amd64.tar.gz
+            ${{ env.BINARY_NAME }}_linux_arm64.tar.gz
+            ${{ env.BINARY_NAME }}_windows_amd64.tar.gz
+
+      - name: Build Docker Image
+        id: build-image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: ${{ env.BINARY_NAME }}
+          tags: ${{ env.DOCKER_TAGS }}
+          containerfiles: |
+            ./Dockerfile
+
+      - name: Push Image to Registry
+        id: push-to-quay
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build-image.outputs.image }}
+          tags: ${{ steps.build-image.outputs.tags }}
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ secrets.REGISTRY_USER }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}

@@ -1,0 +1,15 @@
+repositories:
+  - name: "some-project"
+    files:
+      - filename: "README.md"
+        content: |
+          # Welcome to some-project, {{ .user }}!
+          This repository contains various examples.
+        values:
+          user: "Bob"
+      - filename: "config.json"
+        content: |
+          {
+            "version": "1.0",
+            "description": "Configuration file for some-project"
+          }
