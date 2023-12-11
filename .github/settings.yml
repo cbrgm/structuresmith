@@ -21,8 +21,8 @@ repository:
 # Labels: define labels for Issues and Pull Requests
 labels:
   - name: bug
-    color: CC0000
-    description: An issue with the system 🐛.
+    color: '#336699'
+    description: An issue with the system.
 
   - name: feature
     color: '#336699'
@@ -38,25 +38,3 @@ collaborators:
   #   permission: push
   # - username: hubot
   #   permission: pull
-
-branches:
-  - name: main
-    # https://docs.github.com/en/rest/reference/repos#update-branch-protection
-    # Branch Protection settings. Set to null to disable
-    protection:
-      required_pull_request_reviews:
-        required_approving_review_count: 0
-        dismiss_stale_reviews: true
-        require_code_owner_reviews: false
-        dismissal_restrictions:
-          users: []
-          teams: []
-      required_status_checks:
-        strict: false
-        contexts: []
-      enforce_admins: false
-      required_linear_history: false
-      restrictions:
-        apps: []
-        users: []
-        teams: []
