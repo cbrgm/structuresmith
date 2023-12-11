@@ -62,7 +62,7 @@ Please check out the [action.yml](./action.yml) and the example [workflow](.gith
 * `-r`, `--repo`: Specify a single repository to process.
 * `-p`, `--max-parallel`: Maximum number of repositories to process in parallel. (default: `5`)
 
-## Sample configurations
+## Configuration Overview
 
 Please take a look at the sample [configuration.yml](./configuration.yml) in this repository and check out the [template](./templates/) directoy.
 
@@ -72,38 +72,43 @@ templateGroups:
 
   # Group for common git files like .gitignore and LICENSE
   commonGitFiles:
-    - filename: ".gitignore"
-      sourceFile: "gitignore.tmpl"  # Template for .gitignore file
-    - filename: "LICENSE"
-      sourceFile: "license.tmpl"    # Template for LICENSE file
-    - filename: ".img/logo.png"     # Also supports binary or non-text copies
-      sourceFile: "logo.png"
+    - destination: ".gitignore"
+      source: "gitignore.tmpl"  # Template for .gitignore file
+    - destination: "LICENSE"
+      source: "license.tmpl"    # Template for LICENSE file
+    - destination: ".img/logo.png"  # Also supports binary or non-text copies
+      source: "logo.png"
+
+  # Group for Go-specific files like .golangci.yml
+  projectSpecificFiles:
+    - destination: ".golangci.yml"
+      source: "golangci.tmpl"   # Template for .golangci.yml
+      values:
+        golangciVersion: "1.54.x"
 
     # Also supports downloading text and non-text / binary files from (accessible) URLs
     # You may also add values here used for templating after downloading the artifact
-    - filename: "Dockerfile"
+    - destination: "Dockerfile"
       sourceUrl: "https://raw.githubusercontent.com/cbrgm/promcheck/main/Dockerfile"
-    - filename: "archive.tar.gz"
-      sourceUrl: "https://github.com/cbrgm/promcheck/releases/download/v1.1.8/promcheck_darwin_amd64.tar.gz"
 
-  # Group for Go-specific files like .golangci.yml
-  goSpecificFiles:
-    - filename: ".golangci.yml"
-      sourceFile: "golangci.tmpl"   # Template for .golangci.yml
+    # Group for templating a whole directory
+    # You may also add values here as well for templating files while traversing the directory.
+    - destination: "docs/"
+      source: "docs_templaes/"  # Directory containing multiple template files
       values:
-        golangciVersion: "1.54.x"
+        foo: "bar"
 
 # List of repositories / projects to apply the template groups
 repositories:
 
   # First repository configuration
-  - name: "example/repo1" # This will create a subdirectory ./out/example/repo1/
+  - name: "example/repo1"  # This will create a subdirectory ./out/example/repo1/
     groups:
       - groupName: "commonGitFiles"   # Referencing commonGitFiles group
         values:
           Author: "Author Name"       # Values to substitute in templates
           Year: "2023"
-      - groupName: "goSpecificFiles"  # Referencing goSpecificFiles group
+      - groupName: "projectSpecificFiles"  # Referencing projectSpecificFiles group
 
   # Second repository configuration
   - name: "example/repo2"
@@ -114,46 +119,91 @@ repositories:
           Year: "2023"
 
   # Third repository with individual files but no groups
-  - name: "some-project" # This will create a subdirectory ./out/some-project/
+  - name: "some-project"  # This will create a subdirectory ./out/some-project/
     files:
-      - filename: "README.md"
+      - destination: "README.md"
         content: |
-          # Welcome to example/repo3
+          # Welcome to some-project
           This repository contains various examples.
-        # Inline content is used here instead of a template file
-      - filename: "config.json"
-        content: |
-          {
-            "version": "1.0",
-            "description": "Configuration file for example/repo3"
-          }
-```
-
-### Kickstart configuration
-
-To get you started: A minimal configuration with all file content in `yaml` may look like this:
-
-```yaml
-repositories:
-  - name: "some-project"
-    files:
-      - filename: "README.md"
-        content: |
-          # Welcome to some-project, {{ .user }}!
-          This repository contains various examples.
-        values:
-          user: "Bob"
-      - filename: "config.json"
+      - destination: "config.json"
         content: |
           {
             "version": "1.0",
             "description": "Configuration file for some-project"
           }
 ```
-Render all files to `./out/some-project/`:
 
-```bash
-structuresmith --config ./examples/configuration-simple.yml
+### Example 1: Basic Repository with Common and Project Specific Files
+
+```yaml
+templateGroups:
+  # [Existing commonGitFiles and projectSpecificFiles definitions]
+
+repositories:
+  - name: "basic-project"
+    groups:
+      - groupName: "commonGitFiles"
+        values:
+          Author: "Jane Doe"
+          Year: "2023"
+      - groupName: "projectSpecificFiles"
+```
+
+### Example 2: Advanced Repository with Custom Content and Directory Templating
+
+```yaml
+templateGroups:
+  # [Existing templateGroups definitions]
+
+repositories:
+  - name: "advanced-custom-project"
+    files:
+      - destination: "special.md"
+        content: |
+          # Special Markdown File
+          This is a specially crafted markdown file.
+    groups:
+      - groupName: "projectSpecificFiles"
+      - groupName: "commonGitFiles"
+        values:
+          Author: "Alice Johnson"
+          Year: "2023"
+```
+
+### Example 3: Repository with External Resources and Nested Templating Values
+
+```yaml
+templateGroups:
+  # [Existing templateGroups definitions]
+
+repositories:
+  - name: "external-resource-project"
+    files:
+      - destination: "external_documentation.md"
+        sourceUrl: "https://example.com/documentation.md"
+        values:
+          Author: "Bob Smith"
+          Year: "2023"
+          Nested:
+            Level1: "Value1"
+            Level2:
+              Key: "Value2"
+```
+
+### Example 4: Repository with Direct Directory Structure
+```yaml
+templateGroups:
+  # [Existing templateGroups definitions]
+
+repositories:
+  - name: "direct-directory-structure-project"
+    files:
+      - destination: "docs/"
+        source: "documentation_templates/"  # Source directory containing documentation templates
+      - destination: "scripts/"
+        source: "script_templates/"          # Source directory for script templates
+        values:
+            UseBash: true
 ```
 
 Please help us adding more [examples](./examples).

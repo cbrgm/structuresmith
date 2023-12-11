@@ -60,11 +60,11 @@ type TemplateGroupRef struct {
 
 // FileStructure describes a file to be created from a template or URL.
 type FileStructure struct {
-	Filename   string `yaml:"filename"`
-	SourceFile string `yaml:"sourceFile"`
-	SourceURL  string `yaml:"sourceUrl"`
-	Content    string `yaml:"content"`
-	Values     map[string]interface{}
+	Destination string `yaml:"destination"`
+	Source      string `yaml:"source"`
+	SourceURL   string `yaml:"sourceUrl"`
+	Content     string `yaml:"content"`
+	Values      map[string]interface{}
 }
 
 // Template represents a template consisting of multiple files.
@@ -87,7 +87,9 @@ func main() {
 	var args CLIArgs
 	args.OutputPath = "out"         // Default output path
 	args.TemplatesDir = "templates" // Default templates directory
-	args.MaxParallel = 5            // Default maximum parallel processing
+	if args.MaxParallel <= 0 {      // Default maximum parallel processing
+		args.MaxParallel = runtime.NumCPU()
+	}
 
 	arg.MustParse(&args)
 
@@ -105,6 +107,11 @@ func main() {
 	log.Println("Validating configuration...")
 	if err := validateConfig(config); err != nil {
 		log.Fatalf("Configuration validation error: %v\n", err)
+	}
+
+	// Check if the specified repository exists in the configuration
+	if args.Repo != "" && !repositoryExists(args.Repo, config.Repositories) {
+		log.Fatalf("Specified repository '%s' not found in the configuration.", args.Repo)
 	}
 
 	startTime := time.Now()
@@ -138,6 +145,16 @@ func main() {
 	log.Printf("Parallel processing completed in %.2fs. Have a great day!\n", duration.Seconds())
 }
 
+// repositoryExists checks if a repository exists in the given list of repositories.
+func repositoryExists(name string, repositories []RepositoryConfig) bool {
+	for _, repo := range repositories {
+		if repo.Name == name {
+			return true
+		}
+	}
+	return false
+}
+
 // readConfig reads and parses the YAML configuration file.
 func readConfig(filename, templatesDir string) (Config, error) {
 	var config Config
@@ -151,13 +168,24 @@ func readConfig(filename, templatesDir string) (Config, error) {
 		return config, fmt.Errorf("failed to unmarshal YAML: %w", err)
 	}
 
+	// Add templatesDir prefix to sources in template groups
 	for _, group := range config.TemplateGroups {
 		for i, file := range group {
-			if file.SourceFile != "" {
-				group[i].SourceFile = filepath.Join(templatesDir, file.SourceFile)
+			if file.Source != "" {
+				group[i].Source = filepath.Join(templatesDir, file.Source)
 			}
 		}
 	}
+
+	// Add templatesDir prefix to sources directly under repositories
+	for i, repo := range config.Repositories {
+		for j, file := range repo.Files {
+			if file.Source != "" {
+				config.Repositories[i].Files[j].Source = filepath.Join(templatesDir, file.Source)
+			}
+		}
+	}
+
 	log.Println("Configuration read successfully.")
 	return config, nil
 }
@@ -210,12 +238,12 @@ func validateDuplicateTemplateGroups(groups map[string][]FileStructure) error {
 func validateFileStructures(groups map[string][]FileStructure) error {
 	for _, files := range groups {
 		for _, file := range files {
-			if file.SourceFile != "" && file.Content != "" {
-				return fmt.Errorf("both SourceFile and Content set for file: %s", file.Filename)
+			if file.Source != "" && file.Content != "" {
+				return fmt.Errorf("both SourceFile and Content set for file: %s", file.Destination)
 			}
-			if file.SourceFile != "" {
-				if _, err := os.Stat(file.SourceFile); os.IsNotExist(err) {
-					return fmt.Errorf("template file not found: %s", file.SourceFile)
+			if file.Source != "" {
+				if _, err := os.Stat(file.Source); os.IsNotExist(err) {
+					return fmt.Errorf("template file or directory not found: %s", file.Source)
 				}
 			}
 		}
@@ -272,8 +300,8 @@ func processRepository(repo Repository, globalGroups map[string][]FileStructure,
 	}
 
 	for _, file := range repo.Files {
-		if err := createFileFromTemplate(repo.Name, file, outputPath); err != nil {
-			return fmt.Errorf("error creating file from template: %w", err)
+		if err := processFileStructure(repo.Name, file, outputPath); err != nil {
+			return fmt.Errorf("error processing file structure: %w", err)
 		}
 	}
 
@@ -317,21 +345,62 @@ func mergeValues(groupValues, fileValues map[string]interface{}) map[string]inte
 // generateFilesFromTemplate generates files for a repository based on the provided template.
 func generateFilesFromTemplate(repoName string, t Template, outputPath string) error {
 	for _, file := range t.Files {
-		if err := createFileFromTemplate(repoName, file, outputPath); err != nil {
+		if err := processFileStructure(repoName, file, outputPath); err != nil {
 			return fmt.Errorf("error creating file from template: %w", err)
 		}
 	}
 	return nil
 }
 
+// processFileStructure determines whether the source is a file or directory and processes accordingly.
+func processFileStructure(repoName string, file FileStructure, outputPath string) error {
+	if file.Source != "" {
+		fileInfo, err := os.Stat(file.Source)
+		if err != nil {
+			return fmt.Errorf("error stating source: %w", err)
+		}
+
+		if fileInfo.IsDir() {
+			return processDirectory(repoName, file, outputPath)
+		} else {
+			return createFileFromTemplate(repoName, file, outputPath)
+		}
+	} else if file.SourceURL != "" || file.Content != "" {
+		return createFileFromTemplate(repoName, file, outputPath)
+	}
+	return nil
+}
+
+// processDirectory processes each file within a directory.
+func processDirectory(repoName string, directory FileStructure, outputPath string) error {
+	return filepath.Walk(directory.Source, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			relPath, err := filepath.Rel(directory.Source, path)
+			if err != nil {
+				return fmt.Errorf("error getting relative path: %w", err)
+			}
+			file := FileStructure{
+				Source:      path,
+				Destination: filepath.Join(directory.Destination, relPath),
+				Values:      directory.Values,
+			}
+			return createFileFromTemplate(repoName, file, outputPath)
+		}
+		return nil
+	})
+}
+
 // createFileFromTemplate creates a file based on the FileStructure details.
 func createFileFromTemplate(repoName string, file FileStructure, outputPath string) error {
-	outputPath = filepath.Join(outputPath, repoName, filepath.Dir(file.Filename))
+	outputPath = filepath.Join(outputPath, repoName, filepath.Dir(file.Destination))
 	if err := os.MkdirAll(outputPath, os.ModePerm); err != nil {
 		return fmt.Errorf("creating directory: %w", err)
 	}
 
-	fullPath := filepath.Join(outputPath, filepath.Base(file.Filename))
+	fullPath := filepath.Join(outputPath, filepath.Base(file.Destination))
 
 	// Create file based on content, URL or file source.
 	if file.Content != "" {
@@ -344,13 +413,13 @@ func createFileFromTemplate(repoName string, file FileStructure, outputPath stri
 		if err := createTemplatedFile(fullPath, content, file.Values); err != nil {
 			return copyContentToFile(content, fullPath)
 		}
-	} else if file.SourceFile != "" {
-		content, err := os.ReadFile(file.SourceFile)
+	} else if file.Source != "" {
+		content, err := os.ReadFile(file.Source)
 		if err != nil {
 			return fmt.Errorf("reading source file: %w", err)
 		}
 		if err := createTemplatedFile(fullPath, string(content), file.Values); err != nil {
-			return copyFile(file.SourceFile, fullPath)
+			return copyFile(file.Source, fullPath)
 		}
 	}
 	return nil
