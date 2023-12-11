@@ -44,6 +44,16 @@ After installing, you can run Structuresmith with the following command-line arg
 structuresmith --config path/to/config.yaml --output output/directory --templates path/to/templates
 ```
 
+### Container
+
+```bash
+podman run --rm -it quay.io/cbrgm/structuresmith:latest
+```
+
+### GitHub Actions
+
+Please check out the [action.yml](./action.yml) and the example [workflow](.github/workflows/example-workflow.yml).
+
 ## Command-Line Arguments
 
 * `-c`, `--config`: Path to the YAML configuration file.
