@@ -1,5 +1,5 @@
 <h1 align="center">
-<img src=".img/logo.png" width="175px"/>
+<img src=".img/logo.png" width="125px"/>
  <br>
  structuresmith
  </br>
