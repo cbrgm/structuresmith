@@ -154,7 +154,7 @@ func TestValidateFileStructures(t *testing.T) {
 				},
 			},
 			wantErr: true,
-			errMsg:  "template file not found: nonexistent.tmpl",
+			errMsg:  "template file or directory not found: nonexistent.tmpl",
 		},
 	}
 
@@ -312,7 +312,7 @@ func TestValidateConfig(t *testing.T) {
 			name:    "Invalid file structure - non-existent SourceFile",
 			config:  Config{TemplateGroups: map[string][]FileStructure{"group1": {{Destination: "file1", Source: "nonexistent.tmpl"}}}},
 			wantErr: true,
-			errMsg:  "template file not found: nonexistent.tmpl",
+			errMsg:  "template file or directory not found: nonexistent.tmpl",
 		},
 		{
 			name:    "Invalid group reference in repository",
