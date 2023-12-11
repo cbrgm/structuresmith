@@ -1,15 +1,15 @@
 templateGroups:
   commonGitFiles:
-    - filename: ".gitignore"
-      sourceFile: "gitignore.tmpl"
-    - filename: "LICENSE"
-      sourceFile: "LICENSE"
-    - filename: "Dockerfile"
+    - destination: ".gitignore"
+      source: "gitignore.tmpl"
+    - destination: "LICENSE"
+      source: "LICENSE"
+    - destination: "Dockerfile"
       sourceUrl: "https://raw.githubusercontent.com/cbrgm/promcheck/main/Dockerfile"
 
   goSpecificFiles:
-    - filename: ".golangci.yml"
-      sourceFile: "golangci.tmpl"
+    - destination: ".golangci.yml"
+      source: "golangci.tmpl"
 
 repositories:
   - name: "example/repo1"
@@ -23,15 +23,8 @@ repositories:
           golangciVersion: "1.53.x"
 
   - name: "example/repo2"
-    groups:
-      - groupName: "commonGitFiles"
-        values:
-          Author: "Chris Bargmann"
-          Year: "2023"
-
-  - name: "example/repo3"
     files:
-      - filename: "far.txt"
+      - destination: "far.txt"
         content: |
           this is some content {{ .Foo }}
         values:
@@ -42,9 +35,9 @@ repositories:
           Author: "Chris Bargmann"
           Year: "2023"
 
-  - name: "some-project"
+  - name: "example/repo3"
     files:
-      - filename: "far.txt"
+      - destination: "far.txt"
         content: |
           this is some content {{ .Foo }}
         values:

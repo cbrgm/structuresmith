@@ -131,7 +131,7 @@ func TestValidateFileStructures(t *testing.T) {
 			name: "Valid file structures",
 			groups: map[string][]FileStructure{
 				"group1": {
-					{Filename: "file1", SourceFile: tempFile.Name()},
+					{Destination: "file1", Source: tempFile.Name()},
 				},
 			},
 			wantErr: false,
@@ -140,7 +140,7 @@ func TestValidateFileStructures(t *testing.T) {
 			name: "Both SourceFile and Content set",
 			groups: map[string][]FileStructure{
 				"group1": {
-					{Filename: "file1", SourceFile: "file1.tmpl", Content: "content"},
+					{Destination: "file1", Source: "file1.tmpl", Content: "content"},
 				},
 			},
 			wantErr: true,
@@ -150,7 +150,7 @@ func TestValidateFileStructures(t *testing.T) {
 			name: "SourceFile not found",
 			groups: map[string][]FileStructure{
 				"group1": {
-					{Filename: "file2", SourceFile: "nonexistent.tmpl"},
+					{Destination: "file2", Source: "nonexistent.tmpl"},
 				},
 			},
 			wantErr: true,
@@ -261,7 +261,7 @@ func TestValidateURLSchemes(t *testing.T) {
 		},
 		{
 			name:    "No URL field",
-			groups:  map[string][]FileStructure{"group1": {{Filename: "file1"}}},
+			groups:  map[string][]FileStructure{"group1": {{Destination: "file1"}}},
 			wantErr: false,
 		},
 	}
@@ -304,13 +304,13 @@ func TestValidateConfig(t *testing.T) {
 		},
 		{
 			name:    "Invalid file structure - both SourceFile and Content set",
-			config:  Config{TemplateGroups: map[string][]FileStructure{"group1": {{Filename: "file1", SourceFile: "file1.tmpl", Content: "content"}}}},
+			config:  Config{TemplateGroups: map[string][]FileStructure{"group1": {{Destination: "file1", Source: "file1.tmpl", Content: "content"}}}},
 			wantErr: true,
 			errMsg:  "both SourceFile and Content set for file: file1",
 		},
 		{
 			name:    "Invalid file structure - non-existent SourceFile",
-			config:  Config{TemplateGroups: map[string][]FileStructure{"group1": {{Filename: "file1", SourceFile: "nonexistent.tmpl"}}}},
+			config:  Config{TemplateGroups: map[string][]FileStructure{"group1": {{Destination: "file1", Source: "nonexistent.tmpl"}}}},
 			wantErr: true,
 			errMsg:  "template file not found: nonexistent.tmpl",
 		},
@@ -322,7 +322,7 @@ func TestValidateConfig(t *testing.T) {
 		},
 		{
 			name:    "Invalid URL scheme",
-			config:  Config{TemplateGroups: map[string][]FileStructure{"group1": {{Filename: "file1", SourceURL: "invalid-url"}}}},
+			config:  Config{TemplateGroups: map[string][]FileStructure{"group1": {{Destination: "file1", SourceURL: "invalid-url"}}}},
 			wantErr: true,
 			errMsg:  "invalid SourceURL: invalid-url",
 		},
