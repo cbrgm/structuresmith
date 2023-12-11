@@ -45,7 +45,7 @@ jobs:
 
       - name: Bump Version
         id: bump
-        uses: cbrgm/structuresmith@main
+        uses: cbrgm/semver-bump-action@main
         with:
           current-version: ${{ env.latest_tag }}
           bump-level: ${{ github.event.inputs.bump-level || 'patch' }}  # Default to 'patch' if input is not provided
