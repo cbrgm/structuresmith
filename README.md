@@ -3,12 +3,12 @@
  <br>
  structuresmith
  </br>
+  [![GitHub release](https://img.shields.io/github/release/cbrgm/structuresmith.svg)](https://github.com/cbrgm/structuresmith)
+  [![Go Report Card](https://goreportcard.com/badge/github.com/cbrgm/structuresmith)](https://goreportcard.com/report/github.com/cbrgm/structuresmith)
+  [![test-and-build](https://github.com/cbrgm/structuresmith/actions/workflows/go-build.yml/badge.svg)](https://github.com/cbrgm/structuresmith/actions/workflows/go-build.yml)
 </h1>
 <h4 align="center">Automates the generation of project files and templates for repositories (and others) based on customizable YAML configurations</h4>
 
-[![GitHub release](https://img.shields.io/github/release/cbrgm/structuresmith.svg)](https://github.com/cbrgm/structuresmith)
-[![Go Report Card](https://goreportcard.com/badge/github.com/cbrgm/structuresmith)](https://goreportcard.com/report/github.com/cbrgm/structuresmith)
-[![test-and-build](https://github.com/cbrgm/structuresmith/actions/workflows/go-build.yml/badge.svg)](https://github.com/cbrgm/structuresmith/actions/workflows/go-build.yml)
 
 ## Features 🌟
 
