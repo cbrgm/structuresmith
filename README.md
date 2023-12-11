@@ -22,11 +22,24 @@
 - **Selective Processing** 🎯: Processes a single or multiple repositories as needed.
 - **Clean Output** 🧹: Clears existing output directories for up-to-date content generation.
 
+## Installation
+
+You can download the latest release of structuresmith with this one-liner on MacOS / Linux (amd64 + arm64):
+
+```
+wget -O- "https://github.com/cbrgm/structuresmith/releases/latest/download/structuresmith_$(uname -s)_$(uname -m).tar.gz" | tar -xz -C .
+```
+
+You may also download the latest pre-compiled binaries from the [GitHub releases page](https://github.com/cbrgm/structuresmith/releases/latest) or build `structuresmith` from source using `Go` (1.21+):
+
+```bash
+make build
+```
+
+
 ## Usage
 
-Before using Structuresmith, download the latest pre-compiled binaries from the [GitHub releases page](https://github.com/cbrgm/structuresmith/releases).
-
-After downloading, you can run Structuresmith with the following command-line arguments:
+After installing, you can run Structuresmith with the following command-line arguments:
 
 ```bash
 structuresmith --config path/to/config.yaml --output output/directory --templates path/to/templates
@@ -154,15 +167,6 @@ Structuresmith leverages Go's powerful templating system, allowing you to define
 
 - Structuresmith uses Go's `text/template` package syntax. This includes conditional statements, range loops, and more, providing a rich set of features for creating complex templates.
 - For detailed information on Go's templating syntax, visit the official documentation: [Go's text/template package](https://golang.org/pkg/text/template/)
-
-
-### Local Development
-
-You can build `structuresmith` from source using `Go` (1.21+):
-
-```bash
-make build
-```
 
 ## Contributing & License
 
