@@ -330,6 +330,7 @@ func processRepository(repo Repository, globalGroups map[string][]FileStructure,
 }
 
 // mergeValues merges group-level values with file-level.
+// For slices and non-map values, the value from src will overwrite the one in dst.
 func mergeValuesRecursively(dst, src map[string]interface{}) map[string]interface{} {
 	for key, srcVal := range src {
 		if dstVal, ok := dst[key]; ok {
@@ -337,13 +338,6 @@ func mergeValuesRecursively(dst, src map[string]interface{}) map[string]interfac
 			if srcMap, srcOk := srcVal.(map[string]interface{}); srcOk {
 				if dstMap, dstOk := dstVal.(map[string]interface{}); dstOk {
 					dst[key] = mergeValuesRecursively(dstMap, srcMap)
-					continue
-				}
-			}
-			// If both values are slices, append them
-			if srcSlice, srcOk := srcVal.([]interface{}); srcOk {
-				if dstSlice, dstOk := dstVal.([]interface{}); dstOk {
-					dst[key] = append(dstSlice, srcSlice...)
 					continue
 				}
 			}

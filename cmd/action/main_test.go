@@ -479,17 +479,22 @@ func TestMergeValuesRecursively(t *testing.T) {
 			},
 		},
 		{
-			name: "Complex nested structure with arrays and maps",
+			name: "Complex nested structure with maps and slices",
 			dst: map[string]interface{}{
 				"level1": map[string]interface{}{
 					"level2a": map[string]interface{}{
-						"key1": "original1",
+						"key1": "old1",
 						"key2": []interface{}{"item1", "item2"},
+						"key3": "old3",
 					},
-					"level2b": "value2b",
+					"level2b": map[string]interface{}{
+						"nestedInLevel2b": "oldValue",
+					},
 				},
 				"level1b": []interface{}{
-					map[string]interface{}{"arrayKey1": "arrayValue1"},
+					map[string]interface{}{
+						"arrayKey1": "arrayValue1",
+					},
 					"arrayItem2",
 				},
 			},
@@ -497,15 +502,20 @@ func TestMergeValuesRecursively(t *testing.T) {
 				"level1": map[string]interface{}{
 					"level2a": map[string]interface{}{
 						"key1": "new1",
-						"key3": "new3",
+						// key2 is a slice, should overwrite
 						"key2": []interface{}{"item3"},
+						"key3": "new3",
 					},
+					// level2b is a map, should merge
 					"level2b": map[string]interface{}{
 						"nestedInLevel2b": "newValue",
 					},
 				},
+				// level1b is a slice, should overwrite
 				"level1b": []interface{}{
-					map[string]interface{}{"arrayKey1": "arrayValue1Modified"},
+					map[string]interface{}{
+						"arrayKey1": "arrayValue1Modified",
+					},
 					"arrayItem3",
 				},
 				"newTopLevel": "newTopValue",
@@ -514,7 +524,7 @@ func TestMergeValuesRecursively(t *testing.T) {
 				"level1": map[string]interface{}{
 					"level2a": map[string]interface{}{
 						"key1": "new1",
-						"key2": []interface{}{"item1", "item2", "item3"},
+						"key2": []interface{}{"item3"}, // src slice overwrites dst slice
 						"key3": "new3",
 					},
 					"level2b": map[string]interface{}{
@@ -522,9 +532,10 @@ func TestMergeValuesRecursively(t *testing.T) {
 					},
 				},
 				"level1b": []interface{}{
-					map[string]interface{}{"arrayKey1": "arrayValue1"},
-					"arrayItem2",
-					"arrayItem3",
+					map[string]interface{}{
+						"arrayKey1": "arrayValue1Modified",
+					},
+					"arrayItem3", // src slice overwrites dst slice
 				},
 				"newTopLevel": "newTopValue",
 			},
