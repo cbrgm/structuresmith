@@ -544,7 +544,7 @@ func TestMergeValuesRecursively(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := mergeValuesRecursively(tt.dst, tt.src)
+			result := mergeValues(tt.dst, tt.src)
 			if !reflect.DeepEqual(result, tt.expected) {
 				t.Errorf("mergeValuesRecursively() = %v, want %v", result, tt.expected)
 			}
