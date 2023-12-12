@@ -522,7 +522,7 @@ func TestMergeValuesRecursively(t *testing.T) {
 					},
 				},
 				"level1b": []interface{}{
-					map[string]interface{}{"arrayKey1": "arrayValue1Modified"},
+					map[string]interface{}{"arrayKey1": "arrayValue1"},
 					"arrayItem2",
 					"arrayItem3",
 				},

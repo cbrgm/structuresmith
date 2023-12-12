@@ -333,23 +333,23 @@ func processRepository(repo Repository, globalGroups map[string][]FileStructure,
 func mergeValuesRecursively(dst, src map[string]interface{}) map[string]interface{} {
 	for key, srcVal := range src {
 		if dstVal, ok := dst[key]; ok {
-			// If the key exists in both maps
+			// If both values are maps, merge them recursively
 			if srcMap, srcOk := srcVal.(map[string]interface{}); srcOk {
 				if dstMap, dstOk := dstVal.(map[string]interface{}); dstOk {
-					// If both values are maps, merge them recursively
 					dst[key] = mergeValuesRecursively(dstMap, srcMap)
-				} else {
-					// If the value in the source is a map but not in the destination, replace it
-					dst[key] = srcVal
+					continue
 				}
-			} else {
-				// If the source value is not a map, replace the destination value
-				dst[key] = srcVal
 			}
-		} else {
-			// If the key doesn't exist in the destination, add it
-			dst[key] = srcVal
+			// If both values are slices, append them
+			if srcSlice, srcOk := srcVal.([]interface{}); srcOk {
+				if dstSlice, dstOk := dstVal.([]interface{}); dstOk {
+					dst[key] = append(dstSlice, srcSlice...)
+					continue
+				}
+			}
 		}
+		// For all other cases, or if the key doesn't exist in dst, set/overwrite the dst value
+		dst[key] = srcVal
 	}
 	return dst
 }
