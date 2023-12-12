@@ -346,50 +346,196 @@ func TestValidateConfig(t *testing.T) {
 	}
 }
 
-func TestMergeValues(t *testing.T) {
-	testCases := []struct {
-		name        string
-		groupValues map[string]interface{}
-		fileValues  map[string]interface{}
-		expected    map[string]interface{}
+func TestMergeValuesRecursively(t *testing.T) {
+	tests := []struct {
+		name     string
+		dst      map[string]interface{}
+		src      map[string]interface{}
+		expected map[string]interface{}
 	}{
 		{
-			name:        "Both maps empty",
-			groupValues: map[string]interface{}{},
-			fileValues:  map[string]interface{}{},
-			expected:    map[string]interface{}{},
+			name: "Simple merge",
+			dst: map[string]interface{}{
+				"key1": "value1",
+			},
+			src: map[string]interface{}{
+				"key2": "value2",
+			},
+			expected: map[string]interface{}{
+				"key1": "value1",
+				"key2": "value2",
+			},
 		},
 		{
-			name:        "Group map empty",
-			groupValues: map[string]interface{}{},
-			fileValues:  map[string]interface{}{"key1": "value1"},
-			expected:    map[string]interface{}{"key1": "value1"},
+			name: "Overwrite value",
+			dst: map[string]interface{}{
+				"key": "original",
+			},
+			src: map[string]interface{}{
+				"key": "new",
+			},
+			expected: map[string]interface{}{
+				"key": "new",
+			},
 		},
 		{
-			name:        "File map empty",
-			groupValues: map[string]interface{}{"key1": "value1"},
-			fileValues:  map[string]interface{}{},
-			expected:    map[string]interface{}{"key1": "value1"},
+			name: "Merge nested maps",
+			dst: map[string]interface{}{
+				"nested": map[string]interface{}{
+					"key1": "value1",
+				},
+			},
+			src: map[string]interface{}{
+				"nested": map[string]interface{}{
+					"key2": "value2",
+				},
+			},
+			expected: map[string]interface{}{
+				"nested": map[string]interface{}{
+					"key1": "value1",
+					"key2": "value2",
+				},
+			},
 		},
 		{
-			name:        "No overlap",
-			groupValues: map[string]interface{}{"key1": "groupValue1"},
-			fileValues:  map[string]interface{}{"key2": "fileValue2"},
-			expected:    map[string]interface{}{"key1": "groupValue1", "key2": "fileValue2"},
+			name: "Merge with empty src map",
+			dst: map[string]interface{}{
+				"key1": "value1",
+				"key2": "value2",
+			},
+			src: map[string]interface{}{},
+			expected: map[string]interface{}{
+				"key1": "value1",
+				"key2": "value2",
+			},
 		},
 		{
-			name:        "Overlap - group values take precedence",
-			groupValues: map[string]interface{}{"key1": "groupValue1"},
-			fileValues:  map[string]interface{}{"key1": "fileValue1", "key2": "fileValue2"},
-			expected:    map[string]interface{}{"key1": "groupValue1", "key2": "fileValue2"},
+			name: "Merge with empty dst map",
+			dst:  map[string]interface{}{},
+			src: map[string]interface{}{
+				"key1": "value1",
+				"key2": "value2",
+			},
+			expected: map[string]interface{}{
+				"key1": "value1",
+				"key2": "value2",
+			},
+		},
+		{
+			name: "Nested maps with overwriting",
+			dst: map[string]interface{}{
+				"nested": map[string]interface{}{
+					"key1": "original",
+					"key2": "keep",
+				},
+			},
+			src: map[string]interface{}{
+				"nested": map[string]interface{}{
+					"key1": "new",
+					"key3": "add",
+				},
+			},
+			expected: map[string]interface{}{
+				"nested": map[string]interface{}{
+					"key1": "new",
+					"key2": "keep",
+					"key3": "add",
+				},
+			},
+		},
+		{
+			name: "Nested maps with different levels",
+			dst: map[string]interface{}{
+				"level1": map[string]interface{}{
+					"level2": "value",
+				},
+			},
+			src: map[string]interface{}{
+				"level1": "new value",
+			},
+			expected: map[string]interface{}{
+				"level1": "new value",
+			},
+		},
+		{
+			name: "Mixed types in nested maps",
+			dst: map[string]interface{}{
+				"key1": map[string]interface{}{
+					"nestedKey": 10,
+				},
+				"key2": "string",
+			},
+			src: map[string]interface{}{
+				"key1": map[string]interface{}{
+					"nestedKey": "overwritten",
+				},
+				"key2": 20,
+			},
+			expected: map[string]interface{}{
+				"key1": map[string]interface{}{
+					"nestedKey": "overwritten",
+				},
+				"key2": 20,
+			},
+		},
+		{
+			name: "Complex nested structure with arrays and maps",
+			dst: map[string]interface{}{
+				"level1": map[string]interface{}{
+					"level2a": map[string]interface{}{
+						"key1": "original1",
+						"key2": []interface{}{"item1", "item2"},
+					},
+					"level2b": "value2b",
+				},
+				"level1b": []interface{}{
+					map[string]interface{}{"arrayKey1": "arrayValue1"},
+					"arrayItem2",
+				},
+			},
+			src: map[string]interface{}{
+				"level1": map[string]interface{}{
+					"level2a": map[string]interface{}{
+						"key1": "new1",
+						"key3": "new3",
+						"key2": []interface{}{"item3"},
+					},
+					"level2b": map[string]interface{}{
+						"nestedInLevel2b": "newValue",
+					},
+				},
+				"level1b": []interface{}{
+					map[string]interface{}{"arrayKey1": "arrayValue1Modified"},
+					"arrayItem3",
+				},
+				"newTopLevel": "newTopValue",
+			},
+			expected: map[string]interface{}{
+				"level1": map[string]interface{}{
+					"level2a": map[string]interface{}{
+						"key1": "new1",
+						"key2": []interface{}{"item1", "item2", "item3"},
+						"key3": "new3",
+					},
+					"level2b": map[string]interface{}{
+						"nestedInLevel2b": "newValue",
+					},
+				},
+				"level1b": []interface{}{
+					map[string]interface{}{"arrayKey1": "arrayValue1Modified"},
+					"arrayItem2",
+					"arrayItem3",
+				},
+				"newTopLevel": "newTopValue",
+			},
 		},
 	}
 
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			result := mergeValues(tc.groupValues, tc.fileValues)
-			if !reflect.DeepEqual(result, tc.expected) {
-				t.Errorf("%s: expected %v, got %v", tc.name, tc.expected, result)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := mergeValuesRecursively(tt.dst, tt.src)
+			if !reflect.DeepEqual(result, tt.expected) {
+				t.Errorf("mergeValuesRecursively() = %v, want %v", result, tt.expected)
 			}
 		})
 	}

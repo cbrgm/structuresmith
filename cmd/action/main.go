@@ -315,7 +315,8 @@ func processRepository(repo Repository, globalGroups map[string][]FileStructure,
 		for i, file := range group {
 			template.Files[i] = file
 			// Merge group-level values with file-level values
-			mergedValues := mergeValues(groupRef.Values, file.Values)
+			mergedValues := mergeValuesRecursively(file.Values, groupRef.Values)
+
 			template.Files[i].Values = mergedValues
 		}
 
@@ -329,17 +330,28 @@ func processRepository(repo Repository, globalGroups map[string][]FileStructure,
 }
 
 // mergeValues merges group-level values with file-level.
-func mergeValues(groupValues, fileValues map[string]interface{}) map[string]interface{} {
-	merged := make(map[string]interface{})
-	// Copy file-level values
-	for k, v := range fileValues {
-		merged[k] = v
+func mergeValuesRecursively(dst, src map[string]interface{}) map[string]interface{} {
+	for key, srcVal := range src {
+		if dstVal, ok := dst[key]; ok {
+			// If the key exists in both maps
+			if srcMap, srcOk := srcVal.(map[string]interface{}); srcOk {
+				if dstMap, dstOk := dstVal.(map[string]interface{}); dstOk {
+					// If both values are maps, merge them recursively
+					dst[key] = mergeValuesRecursively(dstMap, srcMap)
+				} else {
+					// If the value in the source is a map but not in the destination, replace it
+					dst[key] = srcVal
+				}
+			} else {
+				// If the source value is not a map, replace the destination value
+				dst[key] = srcVal
+			}
+		} else {
+			// If the key doesn't exist in the destination, add it
+			dst[key] = srcVal
+		}
 	}
-	// Overwrite with group-level values
-	for k, v := range groupValues {
-		merged[k] = v
-	}
-	return merged
+	return dst
 }
 
 // generateFilesFromTemplate generates files for a repository based on the provided template.
