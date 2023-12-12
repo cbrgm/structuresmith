@@ -315,7 +315,7 @@ func processRepository(repo Repository, globalGroups map[string][]FileStructure,
 		for i, file := range group {
 			template.Files[i] = file
 			// Merge group-level values with file-level values
-			mergedValues := mergeValuesRecursively(file.Values, groupRef.Values)
+			mergedValues := mergeValues(file.Values, groupRef.Values)
 
 			template.Files[i].Values = mergedValues
 		}
@@ -331,13 +331,13 @@ func processRepository(repo Repository, globalGroups map[string][]FileStructure,
 
 // mergeValues merges group-level values with file-level.
 // For slices and non-map values, the value from src will overwrite the one in dst.
-func mergeValuesRecursively(dst, src map[string]interface{}) map[string]interface{} {
+func mergeValues(dst, src map[string]interface{}) map[string]interface{} {
 	for key, srcVal := range src {
 		if dstVal, ok := dst[key]; ok {
 			// If both values are maps, merge them recursively
 			if srcMap, srcOk := srcVal.(map[string]interface{}); srcOk {
 				if dstMap, dstOk := dstVal.(map[string]interface{}); dstOk {
-					dst[key] = mergeValuesRecursively(dstMap, srcMap)
+					dst[key] = mergeValues(dstMap, srcMap)
 					continue
 				}
 			}
