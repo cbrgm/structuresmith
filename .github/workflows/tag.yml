@@ -1,4 +1,5 @@
-name: Publish Tag
+---
+name: publish-release-tag
 
 on:
   schedule:
@@ -26,14 +27,14 @@ on:
         default: 'alpha'
 
 jobs:
-  publish-tag:
+  publish-release-tag:
     runs-on: ubuntu-latest
     steps:
 
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ssh-key: "${{ secrets.COMMIT_KEY }}"
+          token: ${{ secrets.BOT_PAT_TOKEN }}
 
       - name: Get Latest Tag
         id: current
@@ -44,18 +45,18 @@ jobs:
           echo "latest_tag=$latest_tag" >> $GITHUB_ENV
 
       - name: Bump Version
-        id: bump
+        id: bump-semver
         uses: cbrgm/semver-bump-action@main
         with:
           current-version: ${{ env.latest_tag }}
-          bump-level: ${{ github.event.inputs.bump-level || 'patch' }}  # Default to 'patch' if input is not provided
+          bump-level: ${{ github.event.inputs.bump-level || 'patch' }}
           prerelease-tag: ${{ github.event.inputs.prerelease-tag }}
 
       - name: Publish Git Tag
         run: |
           git fetch --tags
           latest_tag=$(git tag --sort=taggerdate | tail -n 1)
-          new_tag=${{ steps.bump.outputs.new_version }}
+          new_tag=${{ steps.bump-semver.outputs.new_version }}
           if [[ $(git rev-list $latest_tag..HEAD --count) -gt 0 ]]; then
             git config user.name "GitHub Actions"
             git config user.email "github-actions@users.noreply.github.com"
@@ -64,3 +65,5 @@ jobs:
           else
             echo "No new commits since last tag. Skipping tag push. ($new_tag)"
           fi
+
+...

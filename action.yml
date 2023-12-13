@@ -24,7 +24,7 @@ inputs:
 
 runs:
   using: docker
-  image: 'docker://quay.io/cbrgm/structuresmith:v1'
+  image: 'docker://ghcr.io/cbrgm/structuresmith:v1'
   args:
     - --config
     - ${{ inputs.config-file }}

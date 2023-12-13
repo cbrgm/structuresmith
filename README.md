@@ -8,7 +8,6 @@
 <p align="center">
   <a href="https://github.com/cbrgm/structuresmith"><img src="https://img.shields.io/github/release/cbrgm/structuresmith.svg" alt="GitHub release"></a>
   <a href="https://goreportcard.com/report/github.com/cbrgm/structuresmith"><img src="https://goreportcard.com/badge/github.com/cbrgm/structuresmith" alt="Go Report Card"></a>
-  <a href="https://github.com/cbrgm/structuresmith/actions/workflows/go-build.yml"><img src="https://github.com/cbrgm/structuresmith/actions/workflows/go-build.yml/badge.svg" alt="test-and-build"></a>
 </p>
 
 ## Features 🌟
@@ -26,7 +25,8 @@
 You can download the latest release of structuresmith with this one-liner on MacOS / Linux (amd64 + arm64):
 
 ```
-wget -O- "https://github.com/cbrgm/structuresmith/releases/latest/download/structuresmith_$(uname -s)_$(uname -m).tar.gz" | tar -xz -C .
+wget -O structuresmith "https://github.com/cbrgm/structuresmith/releases/latest/download/structuresmith_$(uname -s)-$(uname -m)"
+
 ```
 
 You may also download the latest pre-compiled binaries from the [GitHub releases page](https://github.com/cbrgm/structuresmith/releases/latest) or build `structuresmith` from source using `Go` (1.21+):
@@ -229,5 +229,8 @@ Structuresmith leverages Go's powerful templating system, allowing you to define
 
 ## Contributing & License
 
-Feel free to submit changes! See the [Contributing Guide](https://github.com/cbrgm/contributing/blob/master/CONTRIBUTING.md). This project is open-source
-and is developed under the terms of the [Apache 2.0 License](https://github.com/cbrgm/structuresmith/blob/master/LICENSE).
+We welcome and value your contributions to this project! 👍 If you're interested in making improvements or adding features, please refer to our [Contributing Guide](https://github.com/cbrgm/semver-bump-action/blob/main/CONTRIBUTING.md). This guide provides comprehensive instructions on how to submit changes, set up your development environment, and more.
+
+Please note that this project is developed in my spare time and is available for free 🕒💻. As an open-source initiative, it is governed by the [Apache 2.0 License](https://github.com/cbrgm/semver-bump-action/blob/main/LICENSE). This license outlines your rights and obligations when using, modifying, and distributing this software.
+
+Your involvement, whether it's through code contributions, suggestions, or feedback, is crucial for the ongoing improvement and success of this project. Together, we can ensure it remains a useful and well-maintained resource for everyone 🌍.
