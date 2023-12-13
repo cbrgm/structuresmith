@@ -26,7 +26,6 @@ You can download the latest release of structuresmith with this one-liner on Mac
 
 ```
 wget -O structuresmith "https://github.com/cbrgm/structuresmith/releases/latest/download/structuresmith_$(uname -s)-$(uname -m)"
-
 ```
 
 You may also download the latest pre-compiled binaries from the [GitHub releases page](https://github.com/cbrgm/structuresmith/releases/latest) or build `structuresmith` from source using `Go` (1.21+):
@@ -47,7 +46,7 @@ structuresmith --config path/to/config.yaml --output output/directory --template
 ### Container
 
 ```bash
-podman run --rm -it quay.io/cbrgm/structuresmith:latest
+podman run --rm -it ghcr.io/cbrgm/structuresmith:latest
 ```
 
 ### GitHub Actions
