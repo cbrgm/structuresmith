@@ -1,0 +1,10 @@
+FROM i386/alpine:3.19 AS build
+RUN apk add --no-cache ca-certificates
+
+FROM scratch
+
+ENTRYPOINT ["/usr/bin/structuresmith"]
+
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+
+COPY bin/structuresmith /usr/bin/structuresmith
