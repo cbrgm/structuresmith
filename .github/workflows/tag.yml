@@ -40,7 +40,7 @@ jobs:
         id: current
         run: |
           git fetch --tags
-          latest_tag=$(git tag --sort=taggerdate | tail -n 1)
+          latest_tag=$(git tag | sort -V | tail -n 1)
           echo "current version is: $latest_tag"
           echo "latest_tag=$latest_tag" >> $GITHUB_ENV
 
@@ -55,7 +55,7 @@ jobs:
       - name: Publish Git Tag
         run: |
           git fetch --tags
-          latest_tag=$(git tag --sort=taggerdate | tail -n 1)
+          latest_tag=$(git tag | sort -V | tail -n 1)
           new_tag=${{ steps.bump-semver.outputs.new_version }}
           if [[ $(git rev-list $latest_tag..HEAD --count) -gt 0 ]]; then
             git config user.name "GitHub Actions"
