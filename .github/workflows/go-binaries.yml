@@ -44,4 +44,10 @@ jobs:
         with:
           generate_release_notes: true
           files: "dist/*"
+          token: ${{ secrets.BOT_PAT_TOKEN }}
+
+      - name: Update version
+        uses: nowactions/update-majorver@v1
+        if: startsWith(github.ref, 'refs/tags/v')
+
 ...
