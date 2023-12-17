@@ -1,5 +1,5 @@
 {
-  "generated_at": "2023-12-17T01:31:47.948534+01:00",
+  "generated_at": "2023-12-17T02:06:11.924475+01:00",
   "version": "v1.1.4-dirty",
   "files": [
     {
@@ -16,6 +16,9 @@
     },
     {
       "path": ".github/pull_request_template.md"
+    },
+    {
+      "path": ".github/renovate.json"
     },
     {
       "path": ".github/settings.yml"
