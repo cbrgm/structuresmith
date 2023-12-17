@@ -1,7 +1,7 @@
 ---
 name: automerge
 
-on: pull_request_target
+on: pull_request
 
 permissions:
   contents: write
@@ -43,4 +43,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.BOT_PAT_TOKEN }}
 
+  cbrgm:
+    runs-on: ubuntu-latest
+    if: github.actor == 'cbrgm' && contains(github.event.pull_request.labels.*.name, 'auto-merge')
+
+    steps:
+      - name: Enable automerge
+        id: automerge
+        run: gh pr merge --rebase --auto ${{ github.event.pull_request.html_url }}
+        env:
+          GH_TOKEN: ${{ secrets.BOT_PAT_TOKEN }}
 ...
