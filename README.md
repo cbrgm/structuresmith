@@ -8,6 +8,9 @@
 <p align="center">
   <a href="https://github.com/cbrgm/structuresmith"><img src="https://img.shields.io/github/release/cbrgm/structuresmith.svg" alt="GitHub release"></a>
   <a href="https://goreportcard.com/report/github.com/cbrgm/structuresmith"><img src="https://goreportcard.com/badge/github.com/cbrgm/structuresmith" alt="Go Report Card"></a>
+  <a href="https://github.com/cbrgm/structuresmith/actions/workflows/go-lint-test.yml"><img src="https://github.com/cbrgm/structuresmith/actions/workflows/go-lint-test.yml/badge.svg" alt="go-lint-test"></a>
+  <a href="https://github.com/cbrgm/structuresmith/actions/workflows/go-binaries.yml"><img src="https://github.com/cbrgm/structuresmith/actions/workflows/go-binaries.yml/badge.svg" alt="go-binaries"></a>
+  <a href="https://github.com/cbrgm/structuresmith/actions/workflows/container.yml"><img src="https://github.com/cbrgm/structuresmith/actions/workflows/container.yml/badge.svg" alt="container"></a>
 </p>
 
 - [Features 🌟](#features-)
