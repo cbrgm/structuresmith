@@ -16,6 +16,6 @@ jobs:
           # required
           project: example/repo1
           # optional
-          config-file: ./anvil.yml
-          output-path: ./out
-          templates-dir: ./templates
+          config: ./anvil.yml
+          output: ./out
+          templates: ./templates
