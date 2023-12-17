@@ -22,6 +22,7 @@ runs:
   using: docker
   image: 'docker://ghcr.io/cbrgm/structuresmith:v1'
   args:
+    - render
     - --config
     - ${{ inputs.config }}
     - --output
