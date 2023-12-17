@@ -2,6 +2,8 @@ templateGroups:
   commonGitFiles:
     - destination: ".gitignore"
       source: "gitignore.tmpl"
+    - destination: "sub"
+      source: "./subdirectory"
     - destination: "LICENSE"
       source: "LICENSE"
     - destination: "Dockerfile"
@@ -11,7 +13,7 @@ templateGroups:
     - destination: ".golangci.yml"
       source: "golangci.tmpl"
 
-repositories:
+projects:
   - name: "example/repo1"
     groups:
       - groupName: "commonGitFiles"

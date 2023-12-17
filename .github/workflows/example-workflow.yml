@@ -11,8 +11,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Render All Files
-        uses: cbrgm/structuresmith@v1.1.4
+        uses: cbrgm/structuresmith@v1
         with:
-          config-file: ./examples/configuration-simple.yml
+          # required
+          project: example/repo1
+          # optional
+          config-file: ./anvil.yml
           output-path: ./out
-          max-parallel: 1
+          templates-dir: ./templates

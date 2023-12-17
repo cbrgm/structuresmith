@@ -10,8 +10,8 @@ updates:
     directory: "/"
     # Directory path to search for dependencies
     schedule:
-      # Update interval (e.g., weekly)
-      interval: "weekly"
+      # Update interval (e.g., daily)
+      interval: "daily"
     groups:
       all-dependencies:
         patterns:
@@ -25,8 +25,8 @@ updates:
     directory: "/"
     # Directory path to search for dependencies
     schedule:
-      # Update interval (e.g., weekly)
-      interval: "weekly"
+      # Update interval (e.g., daily)
+      interval: "daily"
     groups:
       all-dependencies:
         patterns:
@@ -40,8 +40,8 @@ updates:
     directory: "/"
     # Directory path to search for dependencies
     schedule:
-      # Update interval (e.g., weekly)
-      interval: "weekly"
+      # Update interval (e.g., daily)
+      interval: "daily"
     groups:
       all-dependencies:
         patterns:
@@ -55,8 +55,8 @@ updates:
     directory: "/"
     # Directory path to search for dependencies
     schedule:
-      # Update interval (e.g., weekly)
-      interval: "weekly"
+      # Update interval (e.g., daily)
+      interval: "daily"
     groups:
       all-dependencies:
         patterns:
