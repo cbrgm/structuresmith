@@ -2,6 +2,8 @@ templateGroups:
   commonGitFiles:
     - destination: ".gitignore"
       source: "gitignore.tmpl"
+    - destination: "sub"
+      source: "./subdirectory"
     - destination: "LICENSE"
       source: "LICENSE"
     - destination: "Dockerfile"

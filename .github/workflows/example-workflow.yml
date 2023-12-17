@@ -11,7 +11,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Render All Files
-        uses: cbrgm/structuresmith@v1.0.1
+        uses: cbrgm/structuresmith@v1
         with:
           config-file: ./examples/configuration-simple.yml
           output-path: ./out
