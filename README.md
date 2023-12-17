@@ -95,6 +95,19 @@ Conducts a dry-run to display the file paths that would be generated, helping to
 structuresmith diff --config path/to/config.yaml --output output/directory --templates path/to/templates project-to-render
 ```
 
+Example output:
+
+```bash
+delete:     .gitignore
+overwrite:  .golangci.yml
+overwrite:  Dockerfile
+overwrite:  LICENSE
+new:        foobar.txt
+overwrite:  sub/bar.txt
+overwrite:  sub/foo.txt
+delete:     sub/nested/foo.txt
+```
+
 ### Render
 
 Processes and writes the templated files to the disk, applying the configurations to generate the specified project structure.

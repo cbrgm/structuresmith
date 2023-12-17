@@ -13,7 +13,7 @@ templateGroups:
     - destination: ".golangci.yml"
       source: "golangci.tmpl"
 
-repositories:
+projects:
   - name: "example/repo1"
     groups:
       - groupName: "commonGitFiles"

@@ -13,7 +13,7 @@ import (
 // ConfigFile represents the structure of the configuration file.
 type ConfigFile struct {
 	TemplateGroups map[string][]FileStructure `yaml:"templateGroups"`
-	Projects       []ProjectConfig            `yaml:"repositories"`
+	Projects       []ProjectConfig            `yaml:"projects"`
 }
 
 // ProjectConfig defines the configuration of a single repository.

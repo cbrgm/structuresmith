@@ -3,23 +3,19 @@ description: 'Automatically generate project templates for repositories'
 author: 'cbrgm'
 
 inputs:
-  config-file:
+  config:
     description: 'Path to the YAML configuration file'
+    required: false
+  project:
+    description: 'Specify a project to render'
     required: true
-  output-path:
+  output:
     description: 'Output path prefix for generated files'
     default: "./out"
     required: false
-  templates-dir:
+  templates:
     description: 'Directory where template files are stored'
     default: "./templates"
-    required: false
-  repo:
-    description: 'Specify a single repository to render'
-    required: false
-  max-parallel:
-    description: 'Maximum number of repositories to process in parallel'
-    default: "5"
     required: false
 
 runs:
@@ -27,15 +23,12 @@ runs:
   image: 'docker://ghcr.io/cbrgm/structuresmith:v1'
   args:
     - --config
-    - ${{ inputs.config-file }}
+    - ${{ inputs.config }}
     - --output
-    - ${{ inputs.output-path }}
+    - ${{ inputs.output }}
     - --templates
-    - ${{ inputs.templates-dir }}
-    - --repo
-    - ${{ inputs.repo }}
-    - --max-parallel
-    - ${{ inputs.max-parallel }}
+    - ${{ inputs.templates }}
+    - ${{ inputs.project }}
 
 branding:
   icon: code
