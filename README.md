@@ -4,21 +4,53 @@
  structuresmith
  </br>
 </h1>
-<h4 align="center">Automates the generation of project files and templates for repositories (and others) based on customizable YAML configurations</h4>
+<h4 align="center">Structuresmith is a powerful tool designed to automate the generation of project files, streamlining repository setup and more using customizable templates. It's ideal for developers looking to maintain consistency and efficiency in their project configurations.</h4>
 <p align="center">
   <a href="https://github.com/cbrgm/structuresmith"><img src="https://img.shields.io/github/release/cbrgm/structuresmith.svg" alt="GitHub release"></a>
   <a href="https://goreportcard.com/report/github.com/cbrgm/structuresmith"><img src="https://goreportcard.com/badge/github.com/cbrgm/structuresmith" alt="Go Report Card"></a>
 </p>
 
+- [Features 🌟](#features---)
+- [What can this tool do for you?](#what-can-this-tool-do-for-you-)
+- [Installation](#installation)
+- [Usage](#usage)
+  * [Validate](#validate)
+  * [Diff](#diff)
+  * [Render](#render)
+  * [Container](#container)
+  * [GitHub Actions](#github-actions)
+- [Configuration Overview](#configuration-overview)
+- [Examples](#examples)
+  * [Example 1: Simple Inline Content for a Single Project](#example-1--simple-inline-content-for-a-single-project)
+  * [Example 2: Single File Template with Value](#example-2--single-file-template-with-value)
+  * [Example 3: Templated File with Nested Values](#example-3--templated-file-with-nested-values)
+  * [Example 4: Using Template Group with Overwritten Values](#example-4--using-template-group-with-overwritten-values)
+  * [Example 5: Multiple Template Groups](#example-5--multiple-template-groups)
+  * [Example 6: Mix of Direct Files and Template Groups](#example-6--mix-of-direct-files-and-template-groups)
+  * [Example 7: Templating a Whole Directory](#example-7--templating-a-whole-directory)
+  * [Example 8: Downloading Content from URLs](#example-8--downloading-content-from-urls)
+- [Lockfile `.anvil.lock`](#lockfile--anvillock-)
+- [Templating Explained 📝](#templating-explained---)
+  * [How It Works](#how-it-works)
+  * [Go Templating Syntax](#go-templating-syntax)
+- [Contributing & License](#contributing---license)
+
+---
+
 ## Features 🌟
 
-- **Template Generation** 📄: Generates files from templates for consistent repository setup.
-- **YAML Configuration** ⚙️: Easy-to-define templates and file structures in YAML format.
-- **Repository Customization** 📚: Unique configurations using a "mixin" approach for each repository.
-- **Content Flexibility** ✍️: Supports external template files, direct content in YAML, and files from URLs.
-- **Robust Validation** 🔍: Ensures configuration integrity with comprehensive validation checks before processing.
-- **Selective Processing** 🎯: Processes a single or multiple repositories as needed.
-- **Clean Output** 🧹: Clears existing output directories for up-to-date content generation.
+- **Template Generation**: Automates the creation of project files, ensuring consistency and standardization across different projects
+- **YAML Configuration**: Easily define templates and file structures in YAML format.
+- **Robust Validation**: Ensures configuration integrity with comprehensive checks and file diffing before processing.
+- **Content Flexibility**:  Supports a variety of content sources, including external templates, direct YAML content, and files from URLs, making it adaptable to different project requirements.
+
+## What can this tool do for you?
+
+1. **Automated Project Setup**: Streamline new project initialization with predefined templates, significantly reducing setup time.
+2. **Standardization Across Projects**: Ensure consistent file structures and setups across multiple projects or repositories, crucial for team coherence and project maintenance.
+3. **Bootstrapping**: Accelerate the creation of initial project structures for quick prototyping and development iterations.
+4. **Custom Template Management**: Efficiently manage and apply custom templates across various projects, especially beneficial in large teams or organizations.
+5. **Configuration Auditing**: Validate YAML configurations before deployment to ensure compliance with required standards and specifications, enhancing reliability and reducing configuration errors.
 
 ## Installation
 
@@ -34,13 +66,41 @@ You may also download the latest pre-compiled binaries from the [GitHub releases
 make build
 ```
 
-
 ## Usage
 
 After installing, you can run Structuresmith with the following command-line arguments:
 
 ```bash
-structuresmith --config path/to/config.yaml --output output/directory --templates path/to/templates
+structuresmith -h
+```
+
+- `-h, --help`: Shows context-sensitive help. This flag can be used with any command to get more information about its usage and options.
+- `--config="anvil.yml"`: Specifies the path to the YAML configuration file. This flag allows you to define a custom configuration file for the tool to use.
+- `--output="out"`: Sets the output path prefix for the generated files. This flag lets you specify where the generated files should be stored.
+- `--templates="templates"`: Indicates the directory where template files are stored. With this flag, you can define a custom location for your template files.
+
+### Validate
+
+Validates the YAML configuration (`anvil.yml`) to ensure its integrity and checks for any potential issues.
+
+```bash
+structuresmith validate --config path/to/config.yaml
+```
+
+### Diff
+
+Conducts a dry-run to display the file paths that would be generated, helping to preview changes without actual file creation.
+
+```bash
+structuresmith diff --config path/to/config.yaml --output output/directory --templates path/to/templates project-to-render
+```
+
+### Render
+
+Processes and writes the templated files to the disk, applying the configurations to generate the specified project structure.
+
+```bash
+structuresmith render --config path/to/config.yaml --output output/directory --templates path/to/templates project-to-render
 ```
 
 ### Container
@@ -53,163 +113,241 @@ podman run --rm -it ghcr.io/cbrgm/structuresmith:latest
 
 Please check out the [action.yml](./action.yml) and the example [workflow](.github/workflows/example-workflow.yml).
 
-## Command-Line Arguments
-
-* `-c`, `--config`: Path to the YAML configuration file.
-* `-o`, `--output`: Output path prefix for generated files. (default: `./out`)
-* `-t`, `--templates`: Directory for template files. (default: `./templates`)
-* `-r`, `--repo`: Specify a single repository to process.
-* `-p`, `--max-parallel`: Maximum number of repositories to process in parallel. (default: `5`)
-
 ## Configuration Overview
 
-Please take a look at the sample [configuration.yml](./configuration.yml) in this repository and check out the [template](./templates/) directoy.
+These examples showcase the versatility and capabilities of `structuresmith`, ranging from simple inline content to more complex configurations using template groups and nested values. Please take a look at the sample [anvil.yml](./anvil.yml).
 
 ```yaml
-# Define template groups with a set of files
-templateGroups:
+# Structuresmith YAML Configuration
+# This configuration showcases the use of template groups, custom values for templating,
+# and the definition of project-specific files. Modify paths and values as needed.
 
-  # Group for common git files like .gitignore and LICENSE
-  commonGitFiles:
-    - destination: ".gitignore"
-      source: "gitignore.tmpl"  # Template for .gitignore file
-    - destination: "LICENSE"
-      source: "license.tmpl"    # Template for LICENSE file
-    - destination: ".img/logo.png"  # Also supports binary or non-text copies
-      source: "logo.png"
+# Define projects to apply template groups
+projects:
 
-  # Group for Go-specific files like .golangci.yml
-  projectSpecificFiles:
-    - destination: ".golangci.yml"
-      source: "golangci.tmpl"   # Template for .golangci.yml
-      values:
-        golangciVersion: "1.54.x"
-
-    # Also supports downloading text and non-text / binary files from (accessible) URLs
-    # You may also add values here used for templating after downloading the artifact
-    - destination: "Dockerfile"
-      sourceUrl: "https://raw.githubusercontent.com/cbrgm/promcheck/main/Dockerfile"
-
-    # Group for templating a whole directory
-    # You may also add values here as well for templating files while traversing the directory.
-    - destination: "docs/"
-      source: "docs_templaes/"  # Directory containing multiple template files
-      values:
-        foo: "bar"
-
-# List of repositories / projects to apply the template groups
-repositories:
-
-  # First repository configuration
-  - name: "example/repo1"  # This will create a subdirectory ./out/example/repo1/
+  # Example Go project configuration
+  - name: "example/go-project"
     groups:
-      - groupName: "commonGitFiles"   # Referencing commonGitFiles group
+      - groupName: "commonFiles"
+      - groupName: "goProjectFiles"
         values:
-          Author: "Author Name"       # Values to substitute in templates
-          Year: "2023"
-      - groupName: "projectSpecificFiles"  # Referencing projectSpecificFiles group
+          packageName: "main"   # Custom value used in Go template
 
-  # Second repository configuration
-  - name: "example/repo2"
+  # Example for a general project using inline content
+  - name: "example/general-project"
     groups:
-      - groupName: "commonGitFiles"
-        values:
-          Author: "Chris Bargmann"
-          Year: "2023"
-
-  # Third repository with individual files but no groups
-  - name: "some-project"  # This will create a subdirectory ./out/some-project/
+      - groupName: "commonFiles"
     files:
-      - destination: "README.md"
-        content: |
-          # Welcome to some-project
-          This repository contains various examples.
       - destination: "config.json"
         content: |
           {
-            "version": "1.0",
-            "description": "Configuration file for some-project"
+            "setting": "value",
+            "enabled": true
           }
+
+# Define template groups with sets of files
+templateGroups:
+
+  # Common files for all projects
+  commonFiles:
+    - destination: ".gitignore"
+      source: "templates/gitignore.tmpl"  # Template for .gitignore
+    - destination: "README.md"
+      source: "templates/readme.tmpl"     # Template for README.md
+
+# Group for specific project types, e.g., Go projects
+  goProjectFiles:
+    - destination: "main.go"
+      source: "templates/main.go.tmpl"    # Main file for Go project
+    - destination: "Makefile"
+      source: "templates/Makefile.tmpl"   # Makefile for build commands
+
+# Uncomment to demonstrate downloading files from URLs
+#   - destination: "Dockerfile"
+#     sourceUrl: "https://example.com/Dockerfile"
+# Uncomment to demonstrate copying whole directories
+#   - destination: "docs/"
+#     source: "docs_templates/"
+
 ```
 
-### Example 1: Basic Repository with Common and Project Specific Files
+## Examples
 
+### Example 1: Simple Inline Content for a Single Project
+
+**Description**: A basic configuration creating a `README.md` file with inline content.
+
+**YAML Configuration**:
+```yaml
+projects:
+  - name: "simple-project"
+    files:
+      - destination: "README.md"
+        content: "Welcome to Simple Project"
+```
+
+**Output:**
+
+* `out/README.md` containing "Welcome to Simple Project".
+
+### Example 2: Single File Template with Value
+
+**Description**: Creating a `config.txt` file from a template, substituting a value.
+**YAML Configuration**:
 ```yaml
 templateGroups:
-  # [Existing commonGitFiles and projectSpecificFiles definitions]
-
-repositories:
-  - name: "basic-project"
+  configFile:
+    - destination: "config.txt"
+      source: "templates/config.tmpl"
+projects:
+  - name: "config-project"
     groups:
-      - groupName: "commonGitFiles"
+      - groupName: "configFile"
         values:
-          Author: "Jane Doe"
-          Year: "2023"
-      - groupName: "projectSpecificFiles"
+          setting: "Enabled"
 ```
 
-### Example 2: Advanced Repository with Custom Content and Directory Templating
+**Output:**
 
+* `out/config.txt` with content from `config.tmpl`, where a template value like `{{ .setting }}` is replaced by "Enabled".
+
+### Example 3: Templated File with Nested Values
+
+**Description**: Creating a file with nested template values.
+**YAML Configuration**:
 ```yaml
 templateGroups:
-  # [Existing templateGroups definitions]
-
-repositories:
-  - name: "advanced-custom-project"
-    files:
-      - destination: "special.md"
-        content: |
-          # Special Markdown File
-          This is a specially crafted markdown file.
+  detailFile:
+    - destination: "details.txt"
+      source: "templates/details.tmpl"
+projects:
+  - name: "detail-project"
     groups:
-      - groupName: "projectSpecificFiles"
-      - groupName: "commonGitFiles"
+      - groupName: "detailFile"
         values:
-          Author: "Alice Johnson"
-          Year: "2023"
+          user:
+            name: "Alice"
+            role: "Developer"
+
 ```
 
-### Example 3: Repository with External Resources and Nested Templating Values
+**Output:**
 
+* `out/details.txt` with content from `details.tmpl`, where template values like `{{ .user.name }}` are replaced by "Alice" and `{{ .user.role }}` by "Developer".
+
+### Example 4: Using Template Group with Overwritten Values
+
+**Description**: Utilizing a template group with values defined in the group and overwritten in the project definition.
+**YAML Configuration**:
 ```yaml
 templateGroups:
-  # [Existing templateGroups definitions]
-
-repositories:
-  - name: "external-resource-project"
-    files:
-      - destination: "external_documentation.md"
-        sourceUrl: "https://example.com/documentation.md"
+  baseFiles:
+    - destination: "base.txt"
+      source: "templates/base.tmpl"
+      values:
+        defaultText: "Default"
+projects:
+  - name: "base-project"
+    groups:
+      - groupName: "baseFiles"
         values:
-          Author: "Bob Smith"
-          Year: "2023"
-          Nested:
-            Level1: "Value1"
-            Level2:
-              Key: "Value2"
+          defaultText: "Customized Text"
 ```
 
-### Example 4: Repository with Direct Directory Structure
+**Output:**
+
+* `out/base.txt` with content from `base.tmpl`, where the default text is overwritten by "Customized Text".
+
+### Example 5: Multiple Template Groups
+
+**Description**: Combining multiple template groups in a single project.
+**YAML Configuration**:
 ```yaml
 templateGroups:
-  # [Existing templateGroups definitions]
-
-repositories:
-  - name: "direct-directory-structure-project"
-    files:
-      - destination: "docs/"
-        source: "documentation_templates/"  # Source directory containing documentation templates
-      - destination: "scripts/"
-        source: "script_templates/"          # Source directory for script templates
-        values:
-            UseBash: true
+  commonFiles:
+    - destination: "README.md"
+      source: "templates/readme.tmpl"
+  additionalFiles:
+    - destination: "extra.txt"
+      source: "templates/extra.tmpl"
+projects:
+  - name: "multi-group-project"
+    groups:
+      - groupName: "commonFiles"
+      - groupName: "additionalFiles"
 ```
 
-Please help us adding more [examples](./examples).
+**Output:**
 
-## Output Directory Structure
+* `out/README.md` from `readme.tmpl`.
+* `out/extra.txt` from `extra.tmpl`.
 
-When Structuresmith generates files, it creates an output directory structure that mirrors the structure defined in your YAML configuration. For each repository, a separate folder is created within the specified output directory.
+### Example 6: Mix of Direct Files and Template Groups
+
+**Description**: A project configuration using a mix of direct file definitions and template groups.
+**YAML Configuration**:
+```yaml
+templateGroups:
+  documentationFiles:
+    - destination: "docs/intro.md"
+      source: "templates/docs/intro.tmpl"
+projects:
+  - name: "mixed-project"
+    files:
+      - destination: "overview.txt"
+        content: "Project Overview"
+    groups:
+      - groupName: "documentationFiles"
+```
+
+**Output:**
+
+* `out/overview.txt` with "Project Overview".
+* `out/docs/intro.md` generated from intro.tmpl.
+
+### Example 7: Templating a Whole Directory
+
+**Description**: Applying templates to an entire directory.
+**YAML Configuration**:
+```yaml
+projects:
+  completeDirectory:
+    - destination: "config/"
+      source: "templates/config_directory/"
+      values:
+        appName: "MyApp"
+
+repositories:
+  - name: "directory-project"
+    groups:
+      - groupName: "completeDirectory"
+```
+
+**Output:**
+
+* Directory `out/config/` with files from `templates/config_directory/`, where template values like `{{ .appName }}` are replaced with "MyApp".
+
+### Example 8: Downloading Content from URLs
+
+**Description**: Fetching a file from a URL and placing it into the project directory.
+**YAML Configuration**:
+```yaml
+projects:
+  - name: "download-project"
+    files:
+      - destination: "Dockerfile"
+        sourceUrl: "https://raw.githubusercontent.com/exampleuser/project/main/Dockerfile"
+```
+
+**Output:**
+
+* `out/Dockerfile` containing the content fetched from the provided URL.
+
+## Lockfile `.anvil.lock`
+
+Structuresmith's `anvil.lock` file is vital for managing project files. It keeps a record of used files and templates, tracking updates since the last use of the tool. An important feature of Structuresmith is its ability to automatically remove files from the project's output directory that are no longer present in the original project configuration. This ensures the output remains synchronized with the current project setup.
+
+Including `anvil.lock` in the project's versioning is beneficial. It provides a clear history of file changes, especially important in team settings to maintain consistency and prevent conflicts in the project's files.
 
 ## Templating Explained 📝
 

@@ -21,15 +21,15 @@ var (
 var CLI struct {
 	Validate struct {
 		GlobalArgs
-	} `cmd:"" help:"Validates the YAML configuration"`
+	} `cmd:"" help:"Validates the YAML configuration to ensure its integrity and checks for any potential issues."`
 
 	Diff struct {
 		DiffArgs
-	} `cmd:"" help:"Performs a dry-run to show file paths that would be created"`
+	} `cmd:"" help:"Conducts a dry-run to display the file paths that would be generated, helping to preview changes without actual file creation."`
 
 	Render struct {
 		DiffArgs
-	} `cmd:"" help:"Writes the templated files to disk"`
+	} `cmd:"" help:"Processes and writes the templated files to the disk, applying the configurations to generate the specified project structure."`
 }
 
 // DiffArgs struct for diff related arguments.
