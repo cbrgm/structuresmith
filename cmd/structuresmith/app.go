@@ -99,7 +99,10 @@ func (app *Structuresmith) render(project string, cfg ConfigFile) error {
 		return err
 	}
 
-	WriteLockFile(allFiles, app.OutputDir)
+	err = WriteLockFile(allFiles, app.OutputDir)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -144,24 +147,6 @@ func handleFileCreation(fullPath, content string, values map[string]interface{})
 		return copyContentToFile(content, fullPath)
 	}
 	return nil
-}
-
-// renderFromURL downloads and renders a file from a URL.
-func (app *Structuresmith) renderFromURL(file FileStructure, fullPath string) error {
-	content, err := downloadFileContent(file.SourceURL)
-	if err != nil {
-		return fmt.Errorf("downloading file from URL: %w", err)
-	}
-	return createTemplatedFile(fullPath, content, file.Values)
-}
-
-// renderFromFile renders a file from a local source file.
-func (app *Structuresmith) renderFromFile(file FileStructure, fullPath string) error {
-	content, err := os.ReadFile(file.Source)
-	if err != nil {
-		return fmt.Errorf("reading source file: %w", err)
-	}
-	return createTemplatedFile(fullPath, string(content), file.Values)
 }
 
 // deleteOrphanedFileStructures removes any files that are no longer needed.
@@ -354,6 +339,7 @@ func createTemplatedFile(path, content string, values map[string]interface{}) er
 }
 
 // copyFile copies a file from source to destination.
+// nolint: unused
 func copyFile(src, dst string) error {
 	input, err := os.ReadFile(src)
 	if err != nil {

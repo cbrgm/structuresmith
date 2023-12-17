@@ -78,7 +78,7 @@ func (a *AnvilLock) saveToDisk(dir string) error {
 
 	data, err := json.MarshalIndent(a, "", "  ")
 	if err != nil {
-		return fmt.Errorf("error marshalling anvil.lock data: %v", err)
+		return fmt.Errorf("error marshaling anvil.lock data: %v", err)
 	}
 
 	return os.WriteFile(lockFilePath, data, 0o644)
@@ -161,7 +161,9 @@ func (d DiffResult) String() string {
 		fmt.Fprintf(writer, "%s\t%s\n", prefix, key)
 	}
 
-	writer.Flush()
+	if err := writer.Flush(); err != nil {
+		return "Error generating output"
+	}
 	return result.String()
 }
 
