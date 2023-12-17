@@ -10,30 +10,30 @@
   <a href="https://goreportcard.com/report/github.com/cbrgm/structuresmith"><img src="https://goreportcard.com/badge/github.com/cbrgm/structuresmith" alt="Go Report Card"></a>
 </p>
 
-- [Features 🌟](#features---)
-- [What can this tool do for you?](#what-can-this-tool-do-for-you-)
+- [Features 🌟](#features-)
+- [What can this tool do for you?](#what-can-this-tool-do-for-you)
 - [Installation](#installation)
-- [Usage](#usage)
-  * [Validate](#validate)
-  * [Diff](#diff)
-  * [Render](#render)
-  * [Container](#container)
-  * [GitHub Actions](#github-actions)
+- [CLI Usage](#cli-usage)
+   * [Validate](#validate)
+   * [Diff](#diff)
+   * [Render](#render)
+- [Container](#container)
+- [GitHub Actions](#github-actions)
 - [Configuration Overview](#configuration-overview)
 - [Examples](#examples)
-  * [Example 1: Simple Inline Content for a Single Project](#example-1--simple-inline-content-for-a-single-project)
-  * [Example 2: Single File Template with Value](#example-2--single-file-template-with-value)
-  * [Example 3: Templated File with Nested Values](#example-3--templated-file-with-nested-values)
-  * [Example 4: Using Template Group with Overwritten Values](#example-4--using-template-group-with-overwritten-values)
-  * [Example 5: Multiple Template Groups](#example-5--multiple-template-groups)
-  * [Example 6: Mix of Direct Files and Template Groups](#example-6--mix-of-direct-files-and-template-groups)
-  * [Example 7: Templating a Whole Directory](#example-7--templating-a-whole-directory)
-  * [Example 8: Downloading Content from URLs](#example-8--downloading-content-from-urls)
-- [Lockfile `.anvil.lock`](#lockfile--anvillock-)
-- [Templating Explained 📝](#templating-explained---)
-  * [How It Works](#how-it-works)
-  * [Go Templating Syntax](#go-templating-syntax)
-- [Contributing & License](#contributing---license)
+   * [Example 1: Simple Inline Content for a Single Project](#example-1-simple-inline-content-for-a-single-project)
+   * [Example 2: Single File Template with Value](#example-2-single-file-template-with-value)
+   * [Example 3: Templated File with Nested Values](#example-3-templated-file-with-nested-values)
+   * [Example 4: Using Template Group with Overwritten Values](#example-4-using-template-group-with-overwritten-values)
+   * [Example 5: Multiple Template Groups](#example-5-multiple-template-groups)
+   * [Example 6: Mix of Direct Files and Template Groups](#example-6-mix-of-direct-files-and-template-groups)
+   * [Example 7: Templating a Whole Directory](#example-7-templating-a-whole-directory)
+   * [Example 8: Downloading Content from URLs](#example-8-downloading-content-from-urls)
+- [Lockfile `.anvil.lock`](#lockfile-anvillock)
+- [Templating Explained](#templating-explained)
+   * [How It Works](#how-it-works)
+   * [Go Templating Syntax](#go-templating-syntax)
+- [Contributing & License](#contributing-license)
 
 ---
 
@@ -66,7 +66,7 @@ You may also download the latest pre-compiled binaries from the [GitHub releases
 make build
 ```
 
-## Usage
+## CLI Usage
 
 After installing, you can run Structuresmith with the following command-line arguments:
 
@@ -116,13 +116,13 @@ Processes and writes the templated files to the disk, applying the configuration
 structuresmith render --config path/to/config.yaml --output output/directory --templates path/to/templates project-to-render
 ```
 
-### Container
+## Container
 
 ```bash
 podman run --rm -it ghcr.io/cbrgm/structuresmith:latest
 ```
 
-### GitHub Actions
+## GitHub Actions
 
 Please check out the [action.yml](./action.yml) and the example [workflow](.github/workflows/example-workflow.yml).
 
@@ -362,7 +362,7 @@ Structuresmith's `anvil.lock` file is vital for managing project files. It keeps
 
 Including `anvil.lock` in the project's versioning is beneficial. It provides a clear history of file changes, especially important in team settings to maintain consistency and prevent conflicts in the project's files.
 
-## Templating Explained 📝
+## Templating Explained
 
 Structuresmith leverages Go's powerful templating system, allowing you to define dynamic content in your templates. This system provides a flexible way to insert values into your files, making your templates adaptable to different contexts.
 
