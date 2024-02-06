@@ -1,6 +1,6 @@
 module github.com/cbrgm/structuresmith
 
-go 1.21.6
+go 1.22.0
 
 require (
 	github.com/alecthomas/kong v0.8.1
