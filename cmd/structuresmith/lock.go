@@ -158,7 +158,7 @@ func (d DiffResult) String() string {
 	for _, key := range keys {
 		status := fileMap[key]
 		prefix := getColorAndPrefix(status)
-		fmt.Fprintf(writer, "%s\t%s\n", prefix, key)
+		_, _ = fmt.Fprintf(writer, "%s\t%s\n", prefix, key)
 	}
 
 	if err := writer.Flush(); err != nil {
