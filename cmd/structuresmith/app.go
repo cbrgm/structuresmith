@@ -139,7 +139,7 @@ func (app *Structuresmith) renderFileStructure(file FileStructure) error {
 }
 
 // handleFileCreation creates or copies a file based on provided content or source.
-func handleFileCreation(fullPath, content string, values map[string]interface{}) error {
+func handleFileCreation(fullPath, content string, values map[string]any) error {
 	// Attempt to create a templated file
 	err := createTemplatedFile(fullPath, content, values)
 	if err != nil {
@@ -221,8 +221,8 @@ func (app *Structuresmith) processProject(p Project, globalGroups map[string][]F
 
 // mergeValues merges group-level values with file-level.
 // For slices and non-map values, the value from src will overwrite the one in dst.
-func mergeValues(dst, src map[string]interface{}) map[string]interface{} {
-	merged := make(map[string]interface{})
+func mergeValues(dst, src map[string]any) map[string]any {
+	merged := make(map[string]any)
 
 	// Copy values from dst into the new map
 	for key, val := range dst {
@@ -233,8 +233,8 @@ func mergeValues(dst, src map[string]interface{}) map[string]interface{} {
 	for key, srcVal := range src {
 		if dstVal, exists := merged[key]; exists {
 			// If both values are maps, merge them recursively
-			if srcMap, srcOk := srcVal.(map[string]interface{}); srcOk {
-				if dstMap, dstOk := dstVal.(map[string]interface{}); dstOk {
+			if srcMap, srcOk := srcVal.(map[string]any); srcOk {
+				if dstMap, dstOk := dstVal.(map[string]any); dstOk {
 					merged[key] = mergeValues(dstMap, srcMap)
 					continue
 				}
@@ -315,7 +315,7 @@ func downloadFileContent(fileURL string) (string, error) {
 }
 
 // createTemplatedFile creates a file from a template content and values.
-func createTemplatedFile(path, content string, values map[string]interface{}) error {
+func createTemplatedFile(path, content string, values map[string]any) error {
 	f, err := os.Create(path)
 	if err != nil {
 		return fmt.Errorf("creating file: %w", err)
