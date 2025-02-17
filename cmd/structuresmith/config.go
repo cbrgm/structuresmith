@@ -25,8 +25,8 @@ type ProjectConfig struct {
 
 // TemplateGroupRef links a template group with specific values.
 type TemplateGroupRef struct {
-	GroupName string                 `yaml:"groupName"`
-	Values    map[string]interface{} `yaml:"values"`
+	GroupName string         `yaml:"groupName"`
+	Values    map[string]any `yaml:"values"`
 }
 
 // FileStructure describes a file to be created from a template or URL.
@@ -35,7 +35,7 @@ type FileStructure struct {
 	Source      string `yaml:"source"`
 	SourceURL   string `yaml:"sourceUrl"`
 	Content     string `yaml:"content"`
-	Values      map[string]interface{}
+	Values      map[string]any
 }
 
 // Template represents a template consisting of multiple files.
