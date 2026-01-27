@@ -117,34 +117,40 @@ func (app *Structuresmith) renderFileStructure(file FileStructure) error {
 		return fmt.Errorf("creating directory: %w", err)
 	}
 
+	// Determine file permissions (default to 0644 if not specified)
+	perm := DefaultFileMode
+	if file.Permissions != nil {
+		perm = *file.Permissions
+	}
+
 	// Handle different file sources
 	switch {
 	case file.Content != "":
-		return handleFileCreation(fullPath, file.Content, file.Values)
+		return handleFileCreation(fullPath, file.Content, file.Values, perm)
 	case file.SourceURL != "":
 		content, err := downloadFileContent(file.SourceURL)
 		if err != nil {
 			return fmt.Errorf("downloading file from URL: %w", err)
 		}
-		return handleFileCreation(fullPath, content, file.Values)
+		return handleFileCreation(fullPath, content, file.Values, perm)
 	case file.Source != "":
 		content, err := os.ReadFile(file.Source)
 		if err != nil {
 			return fmt.Errorf("reading source file: %w", err)
 		}
-		return handleFileCreation(fullPath, string(content), file.Values)
+		return handleFileCreation(fullPath, string(content), file.Values, perm)
 	default:
 		return fmt.Errorf("file structure lacks source information")
 	}
 }
 
 // handleFileCreation creates or copies a file based on provided content or source.
-func handleFileCreation(fullPath, content string, values map[string]any) error {
+func handleFileCreation(fullPath, content string, values map[string]any, perm FileMode) error {
 	// Attempt to create a templated file
-	err := createTemplatedFile(fullPath, content, values)
+	err := createTemplatedFile(fullPath, content, values, perm)
 	if err != nil {
 		// If templating fails, copy the content directly
-		return copyContentToFile(content, fullPath)
+		return copyContentToFile(content, fullPath, perm)
 	}
 	return nil
 }
@@ -283,6 +289,7 @@ func (app *Structuresmith) processDirectory(directory FileStructure) ([]FileStru
 				Source:      path,
 				Destination: filepath.Join(directory.Destination, relPath),
 				Values:      directory.Values,
+				Permissions: directory.Permissions,
 			})
 		}
 		return nil
@@ -315,8 +322,8 @@ func downloadFileContent(fileURL string) (string, error) {
 }
 
 // createTemplatedFile creates a file from a template content and values.
-func createTemplatedFile(path, content string, values map[string]any) error {
-	f, err := os.Create(path)
+func createTemplatedFile(path, content string, values map[string]any, perm FileMode) error {
+	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, perm.Mode())
 	if err != nil {
 		return fmt.Errorf("creating file: %w", err)
 	}
@@ -340,19 +347,19 @@ func createTemplatedFile(path, content string, values map[string]any) error {
 
 // copyFile copies a file from source to destination.
 // nolint: unused
-func copyFile(src, dst string) error {
+func copyFile(src, dst string, perm FileMode) error {
 	input, err := os.ReadFile(src)
 	if err != nil {
 		return fmt.Errorf("reading source file for copy: %w", err)
 	}
 
-	if err := os.WriteFile(dst, input, 0o644); err != nil {
+	if err := os.WriteFile(dst, input, perm.Mode()); err != nil {
 		return fmt.Errorf("writing copied file: %w", err)
 	}
 	return nil
 }
 
 // copyContentToFile writes string content directly to a file.
-func copyContentToFile(content, filePath string) error {
-	return os.WriteFile(filePath, []byte(content), 0o644)
+func copyContentToFile(content, filePath string, perm FileMode) error {
+	return os.WriteFile(filePath, []byte(content), perm.Mode())
 }

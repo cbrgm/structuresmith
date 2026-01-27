@@ -6,9 +6,50 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"gopkg.in/yaml.v3"
 )
+
+// FileMode is a custom type for file permissions that supports YAML unmarshaling
+// from octal strings like "0755" or "0644".
+type FileMode os.FileMode
+
+// DefaultFileMode is the default permission used when none is specified.
+const DefaultFileMode FileMode = 0o644
+
+// UnmarshalYAML implements yaml.Unmarshaler for FileMode.
+// It accepts octal strings like "0755", "0644", "755", or decimal integers.
+func (m *FileMode) UnmarshalYAML(value *yaml.Node) error {
+	var s string
+	if err := value.Decode(&s); err != nil {
+		// Try decoding as integer
+		var i int
+		if err := value.Decode(&i); err != nil {
+			return fmt.Errorf("invalid file mode: must be octal string (e.g., \"0755\") or integer")
+		}
+		*m = FileMode(i)
+		return nil
+	}
+
+	// Parse as octal string
+	parsed, err := strconv.ParseUint(s, 8, 32)
+	if err != nil {
+		return fmt.Errorf("invalid file mode %q: must be octal string (e.g., \"0755\")", s)
+	}
+	*m = FileMode(parsed)
+	return nil
+}
+
+// Mode returns the os.FileMode value.
+func (m FileMode) Mode() os.FileMode {
+	return os.FileMode(m)
+}
+
+// String returns the octal string representation.
+func (m FileMode) String() string {
+	return fmt.Sprintf("%04o", m)
+}
 
 // ConfigFile represents the structure of the configuration file.
 type ConfigFile struct {
@@ -36,6 +77,9 @@ type FileStructure struct {
 	SourceURL   string `yaml:"sourceUrl"`
 	Content     string `yaml:"content"`
 	Values      map[string]any
+	// Permissions specifies the file mode for the destination file.
+	// Accepts octal strings like "0755" or "0644". Defaults to "0644" if not specified.
+	Permissions *FileMode `yaml:"permissions,omitempty"`
 }
 
 // Template represents a template consisting of multiple files.
