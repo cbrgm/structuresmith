@@ -65,6 +65,7 @@ func (app *Structuresmith) diff(project string, cfg ConfigFile) error {
 	}
 
 	diffedFiles := lock.Diff(allFiles)
+	diffedFiles = app.applySkipLogic(diffedFiles)
 	fmt.Printf("\n%s\n", diffedFiles)
 	return nil
 }
@@ -86,9 +87,21 @@ func (app *Structuresmith) render(project string, cfg ConfigFile) error {
 	}
 
 	diffedFiles := lock.Diff(allFiles)
+	diffedFiles = app.applySkipLogic(diffedFiles)
 	fmt.Printf("\n%s\n", diffedFiles)
 
+	// Build a set of skipped file destinations for quick lookup
+	skippedSet := make(map[string]struct{})
+	for _, file := range diffedFiles.SkippedFiles {
+		skippedSet[file.Destination] = struct{}{}
+	}
+
 	for _, file := range allFiles {
+		// Skip files that are marked as skipped (exist and have overwrite: false)
+		if _, shouldSkip := skippedSet[file.Destination]; shouldSkip {
+			log.Printf("Skipping %s (file exists and overwrite is disabled)", filepath.Join(app.OutputDir, file.Destination))
+			continue
+		}
 		if err = app.renderFileStructure(file); err != nil {
 			return err
 		}
@@ -105,6 +118,52 @@ func (app *Structuresmith) render(project string, cfg ConfigFile) error {
 	}
 
 	return nil
+}
+
+// applySkipLogic checks which files should be skipped based on overwrite setting
+// and actual file existence on disk. It moves files from NewFiles and KeptFiles
+// to SkippedFiles if they exist and have overwrite: false.
+func (app *Structuresmith) applySkipLogic(diff DiffResult) DiffResult {
+	result := DiffResult{
+		DeletedFiles: diff.DeletedFiles,
+		SkippedFiles: diff.SkippedFiles,
+	}
+
+	// Process new files - skip if file exists on disk and overwrite is false
+	for _, file := range diff.NewFiles {
+		if !shouldOverwrite(file) && app.fileExistsOnDisk(file.Destination) {
+			result.SkippedFiles = append(result.SkippedFiles, file)
+		} else {
+			result.NewFiles = append(result.NewFiles, file)
+		}
+	}
+
+	// Process kept files (would be overwritten) - skip if overwrite is false
+	for _, file := range diff.KeptFiles {
+		if !shouldOverwrite(file) && app.fileExistsOnDisk(file.Destination) {
+			result.SkippedFiles = append(result.SkippedFiles, file)
+		} else {
+			result.KeptFiles = append(result.KeptFiles, file)
+		}
+	}
+
+	return result
+}
+
+// shouldOverwrite returns true if the file should be overwritten.
+// Defaults to true if Overwrite is not specified (nil).
+func shouldOverwrite(file FileStructure) bool {
+	if file.Overwrite == nil {
+		return true // Default behavior: overwrite
+	}
+	return *file.Overwrite
+}
+
+// fileExistsOnDisk checks if a file exists in the output directory.
+func (app *Structuresmith) fileExistsOnDisk(destination string) bool {
+	fullPath := filepath.Join(app.OutputDir, destination)
+	_, err := os.Stat(fullPath)
+	return err == nil
 }
 
 // renderFileStructure creates a file based on the FileStructure details.
@@ -290,6 +349,7 @@ func (app *Structuresmith) processDirectory(directory FileStructure) ([]FileStru
 				Destination: filepath.Join(directory.Destination, relPath),
 				Values:      directory.Values,
 				Permissions: directory.Permissions,
+				Overwrite:   directory.Overwrite,
 			})
 		}
 		return nil

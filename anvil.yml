@@ -21,6 +21,23 @@ templateGroups:
         echo "Building {{ .AppName }}..."
       permissions: "0755"  # Make script executable
 
+  # Example: protected files that won't be overwritten
+  configFiles:
+    - destination: "config/.env.example"
+      content: |
+        # Copy this file to .env and fill in your values
+        API_KEY=changeme
+        DATABASE_URL=changeme
+      permissions: "0644"
+
+    - destination: "config/.env"
+      content: |
+        # Fill in your secrets below
+        API_KEY=changeme
+        DATABASE_URL=changeme
+      permissions: "0600"
+      overwrite: false  # Protect user customizations from being overwritten
+
 projects:
   - name: "example/repo1"
     groups:

@@ -80,6 +80,9 @@ type FileStructure struct {
 	// Permissions specifies the file mode for the destination file.
 	// Accepts octal strings like "0755" or "0644". Defaults to "0644" if not specified.
 	Permissions *FileMode `yaml:"permissions,omitempty"`
+	// Overwrite controls whether the file should be overwritten if it already exists.
+	// Defaults to true if not specified. Set to false to protect existing files.
+	Overwrite *bool `yaml:"overwrite,omitempty"`
 }
 
 // Template represents a template consisting of multiple files.
