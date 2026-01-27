@@ -3,6 +3,8 @@ package main
 import (
 	"reflect"
 	"testing"
+
+	"gopkg.in/yaml.v3"
 )
 
 func TestValidateDuplicateProjectNames(t *testing.T) {
@@ -373,6 +375,190 @@ func TestFindProject(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("FindProject() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFileModeUnmarshalYAML(t *testing.T) {
+	tests := []struct {
+		name    string
+		yaml    string
+		want    FileMode
+		wantErr bool
+	}{
+		{
+			name:    "Octal string 0644",
+			yaml:    `permissions: "0644"`,
+			want:    FileMode(0o644),
+			wantErr: false,
+		},
+		{
+			name:    "Octal string 0755",
+			yaml:    `permissions: "0755"`,
+			want:    FileMode(0o755),
+			wantErr: false,
+		},
+		{
+			name:    "Octal string without leading zero",
+			yaml:    `permissions: "755"`,
+			want:    FileMode(0o755),
+			wantErr: false,
+		},
+		{
+			name:    "Octal string 0600",
+			yaml:    `permissions: "0600"`,
+			want:    FileMode(0o600),
+			wantErr: false,
+		},
+		{
+			name:    "Octal string 0777",
+			yaml:    `permissions: "0777"`,
+			want:    FileMode(0o777),
+			wantErr: false,
+		},
+		{
+			name:    "Invalid octal string with 8",
+			yaml:    `permissions: "0888"`,
+			want:    FileMode(0),
+			wantErr: true,
+		},
+		{
+			name:    "Invalid octal string with 9",
+			yaml:    `permissions: "0799"`,
+			want:    FileMode(0),
+			wantErr: true,
+		},
+		{
+			name:    "Invalid non-numeric string",
+			yaml:    `permissions: "invalid"`,
+			want:    FileMode(0),
+			wantErr: true,
+		},
+		{
+			name:    "Integer value (parsed as octal in YAML)",
+			yaml:    `permissions: 0644`,
+			want:    FileMode(0o644),
+			wantErr: false,
+		},
+		{
+			name:    "Integer value 0755",
+			yaml:    `permissions: 0755`,
+			want:    FileMode(0o755),
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var result struct {
+				Permissions FileMode `yaml:"permissions"`
+			}
+			err := yaml.Unmarshal([]byte(tt.yaml), &result)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("UnmarshalYAML() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !tt.wantErr && result.Permissions != tt.want {
+				t.Errorf("UnmarshalYAML() = %o, want %o", result.Permissions, tt.want)
+			}
+		})
+	}
+}
+
+func TestFileModeString(t *testing.T) {
+	tests := []struct {
+		name string
+		mode FileMode
+		want string
+	}{
+		{
+			name: "Mode 0644",
+			mode: FileMode(0o644),
+			want: "0644",
+		},
+		{
+			name: "Mode 0755",
+			mode: FileMode(0o755),
+			want: "0755",
+		},
+		{
+			name: "Mode 0600",
+			mode: FileMode(0o600),
+			want: "0600",
+		},
+		{
+			name: "Mode 0777",
+			mode: FileMode(0o777),
+			want: "0777",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.mode.String()
+			if got != tt.want {
+				t.Errorf("String() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFileStructureWithPermissions(t *testing.T) {
+	tests := []struct {
+		name    string
+		yaml    string
+		want    *FileMode
+		wantErr bool
+	}{
+		{
+			name: "File with permissions",
+			yaml: `
+destination: "script.sh"
+source: "script.sh.tmpl"
+permissions: "0755"
+`,
+			want:    func() *FileMode { m := FileMode(0o755); return &m }(),
+			wantErr: false,
+		},
+		{
+			name: "File without permissions (should be nil)",
+			yaml: `
+destination: "readme.md"
+source: "readme.md.tmpl"
+`,
+			want:    nil,
+			wantErr: false,
+		},
+		{
+			name: "File with default-style permissions",
+			yaml: `
+destination: "config.yml"
+content: "key: value"
+permissions: "0644"
+`,
+			want:    func() *FileMode { m := FileMode(0o644); return &m }(),
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var file FileStructure
+			err := yaml.Unmarshal([]byte(tt.yaml), &file)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("UnmarshalYAML() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if tt.want == nil && file.Permissions != nil {
+				t.Errorf("Expected nil permissions, got %v", file.Permissions)
+			}
+			if tt.want != nil {
+				if file.Permissions == nil {
+					t.Errorf("Expected permissions %o, got nil", *tt.want)
+				} else if *file.Permissions != *tt.want {
+					t.Errorf("Permissions = %o, want %o", *file.Permissions, *tt.want)
+				}
 			}
 		})
 	}

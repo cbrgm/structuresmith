@@ -13,6 +13,14 @@ templateGroups:
     - destination: ".golangci.yml"
       source: "golangci.tmpl"
 
+  # Example: scripts with executable permissions
+  scripts:
+    - destination: "scripts/build.sh"
+      content: |
+        #!/bin/bash
+        echo "Building {{ .AppName }}..."
+      permissions: "0755"  # Make script executable
+
 projects:
   - name: "example/repo1"
     groups:
