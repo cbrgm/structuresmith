@@ -563,3 +563,74 @@ permissions: "0644"
 		})
 	}
 }
+
+func TestFileStructureWithOverwrite(t *testing.T) {
+	tests := []struct {
+		name    string
+		yaml    string
+		want    *bool
+		wantErr bool
+	}{
+		{
+			name: "File with overwrite true",
+			yaml: `
+destination: "readme.md"
+content: "# README"
+overwrite: true
+`,
+			want:    func() *bool { b := true; return &b }(),
+			wantErr: false,
+		},
+		{
+			name: "File with overwrite false",
+			yaml: `
+destination: "config.env"
+content: "SECRET=changeme"
+overwrite: false
+`,
+			want:    func() *bool { b := false; return &b }(),
+			wantErr: false,
+		},
+		{
+			name: "File without overwrite (should be nil, defaults to true)",
+			yaml: `
+destination: "readme.md"
+content: "# README"
+`,
+			want:    nil,
+			wantErr: false,
+		},
+		{
+			name: "File with both permissions and overwrite",
+			yaml: `
+destination: "config.env"
+content: "SECRET=changeme"
+permissions: "0600"
+overwrite: false
+`,
+			want:    func() *bool { b := false; return &b }(),
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var file FileStructure
+			err := yaml.Unmarshal([]byte(tt.yaml), &file)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("UnmarshalYAML() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if tt.want == nil && file.Overwrite != nil {
+				t.Errorf("Expected nil overwrite, got %v", *file.Overwrite)
+			}
+			if tt.want != nil {
+				if file.Overwrite == nil {
+					t.Errorf("Expected overwrite %v, got nil", *tt.want)
+				} else if *file.Overwrite != *tt.want {
+					t.Errorf("Overwrite = %v, want %v", *file.Overwrite, *tt.want)
+				}
+			}
+		})
+	}
+}

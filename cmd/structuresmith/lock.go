@@ -120,6 +120,7 @@ const (
 	StatusNew     FileStatus = "New"
 	StatusDeleted FileStatus = "Deleted"
 	StatusKept    FileStatus = "Kept"
+	StatusSkipped FileStatus = "Skipped"
 )
 
 // DiffResult represents the result of diffing FileStructures against AnvilLock entries.
@@ -127,6 +128,7 @@ type DiffResult struct {
 	NewFiles     []FileStructure // Files present in FileStructures but not in AnvilLock.
 	DeletedFiles []FileStructure // Files present in AnvilLock but not in FileStructures.
 	KeptFiles    []FileStructure // Files present in both AnvilLock and FileStructures.
+	SkippedFiles []FileStructure // Files that exist on disk and have overwrite: false.
 }
 
 func (d DiffResult) String() string {
@@ -141,6 +143,9 @@ func (d DiffResult) String() string {
 	}
 	for _, file := range d.KeptFiles {
 		fileMap[file.Destination] = StatusKept
+	}
+	for _, file := range d.SkippedFiles {
+		fileMap[file.Destination] = StatusSkipped
 	}
 
 	// Sort the keys (file paths)
@@ -175,6 +180,8 @@ func getColorAndPrefix(status FileStatus) string {
 		return color.New(color.FgRed).Sprintf("delete:")
 	case StatusKept:
 		return color.New(color.FgYellow).Sprintf("overwrite:")
+	case StatusSkipped:
+		return color.New(color.FgCyan).Sprintf("skip:")
 	default:
 		return "n/a: "
 	}
