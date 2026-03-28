@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Render All Files
-        uses: cbrgm/structuresmith@aad9404f9d63400fbde41299acfddb018a581a75 # main
+        uses: cbrgm/structuresmith@57e77970c669abebdfca9d5f0b4f9142bd1d5f10 # main
         with:
           # required
           project: example/repo1
