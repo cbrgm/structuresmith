@@ -3,7 +3,7 @@ module github.com/cbrgm/structuresmith
 go 1.26.5
 
 require (
-	github.com/alecthomas/kong v1.16.0
+	github.com/alecthomas/kong v1.16.1
 	github.com/fatih/color v1.19.0
 	gopkg.in/yaml.v3 v3.0.1
 )
